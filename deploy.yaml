@@ -1,24 +1,5 @@
 # Playbook to deploy a new instance
 - hosts: skunk
-
-  # Live laravel backend/api/static app 178.62.68.36
-  # stuff to look for
-  # - the laravel installs at /home/neontribe/arc/ARCVService
-  # - it's databases (in mysql - see  /home/neontribe/arc/ARCVService/env for access credentials)
-  # - the frontend deployments at /home/neontribe/arc/ARCVMarket
-
-  # Other things we would be sad to see go but can build again from guthub:
-
-  # Staging (46.101.18.83) is deployed via travis/CI to
-  # Market app: /var/www/voucher-staging.alexandrarose.org.uk
-  # API/Backend: /var/www/voucher-admin-staging.alexandrarose.org.uk
-
-  # ARCVMarket:
-  #     voucher-staging.alexandrarose.org.uk on 46.101.18.83
-  #     ARCVMarket on 46.101.18.83
-  #
-  #     These are both stateless? So don't really need backups.  Is that right?
-
   tasks:
     - name: Update apt
       become: true
@@ -41,16 +22,31 @@
         pkg: "{{ item }}"
         state: latest
       with_items:
-        - mysql-server
-        - mysql-client
-        - python-mysqldb
         - apache2
-        - php7.2
         - git
-        - unzip
+        - git
+        - libapache2-mod-php
+        - mysql-client
+        - mysql-server
         - php-cli
+        - php-json-schema
         - php-mbstring
-        - git
+        - php7.2
+        - php7.2-bcmath
+        - php7.2-curl
+        - php7.2-gd
+        - php7.2-intl
+        - php7.2-json
+        - php7.2-mbstring
+        - php7.2-mysql
+        - php7.2-opcache
+        - php7.2-readline
+        - php7.2-sqlite3
+        - php7.2-xml
+        - php7.2-xmlrpc
+        - php7.2-zip
+        - python-mysqldb
+        - unzip
 
     - shell: hostname
       register: current_hostname
@@ -97,11 +93,6 @@
         login_user: root
         login_password: "{{ mysql_root_pass }}"
 
-    - set_fact:
-        target_name: "{{ archivename.split('.zip')[0] }}"
-      tags:
-        - unpack
-
     - name: Ensure target dir
       become: true
       file:
@@ -109,25 +100,87 @@
         state: directory
         mode: 0775
         owner: "{{ ansible_ssh_user }}"
-      tags:
-        - unpack
 
-    - name: Copy in codebase
+    - name: Get archive
+      get_url:
+        url: "https://github.com/neontribe/ARCVService/archive/{{ arc_version }}.zip"
+        dest: /var/tmp/arc.zip
+
+    - name: Unpack the codebase
       unarchive:
-        src: "{{ archivename }}"
+        src: /var/tmp/arc.zip
         dest: /var/www/arc
-      tags:
-        - unpack
+        remote_src: true
 
-    - set_fact:
-      app_folder: "/var/www/arc/{{ target_name }}"
-      tags:
-        - unpack
+    - name: Check for composer bin
+      stat: "path=/usr/loca/bin/composer"
+      register: composer
 
+    - name: Get Composer MD5
+      uri:
+        url: https://composer.github.io/installer.sig
+        return_content: true
+      register: composer_signature
+      when: not composer.stat.exists
+    
+    - name: Download composer installer.
+      get_url:
+        url: https://getcomposer.org/installer
+        dest: /var/tmp/composer-installer.php
+        mode: 0755
+        checksum: "sha384:{{ composer_signature.content }}"
+      when: not composer.stat.exists
+
+    - name: Install composer
+      shell: php composer-installer.php
+      args:
+        chdir: /var/tmp
+      when: not composer.stat.exists
+    
+    - name: Link composer into path
+      become: true
+      shell: mv /var/tmp/composer.phar /usr/local/bin/composer
+      when: not composer.stat.exists
+
+    - name: Set app dir fact
+      set_fact:
+        app_dir: "/var/www/arc/ARCVService-{{ arc_version[1:] }}"
+
+    - name: Run composer
+      shell: composer install
+      args:
+        chdir: "{{ app_dir }}"
+      tags:
+        - post
 
     # Copy .env.example to .env and edit to local settings
+    - name: Copy in the env file
+      copy:
+        src: backups/{{ arc_source }}/env
+        dest: "{{ app_dir }}/.env"
+      tags:
+        - post
+
     # Update .env to match new settings
-    # composer install
+    - name: Fix DB_DATABASE
+      lineinfile:
+        path: "{{ app_dir }}/.env"
+        regexp: '^DB_DATABASE='
+        line: "DB_DATABASE={{ arc_mysql_name }}"
+
+    - name: DB_USERNAME
+      lineinfile:
+        path: "{{ app_dir }}/.env"
+        regexp: '^DB_USERNAME='
+        line: "DB_USERNAME={{ arc_mysql_user }}"
+
+    - name: DB_PASSWORD
+      lineinfile:
+        path: "{{ app_dir }}/.env"
+        regexp: '^DB_PASSWORD='
+        line: "DB_PASSWORD={{ arc_mysql_pass }}"
+
+
     # If not using Homestead or Valet - you will need to configure permissions on storage and bootstrap/cache. See Laravel 5.4 Installation for more info.
     # import mysql
     # install apache config, update the vhosts to match the target virtual host names
