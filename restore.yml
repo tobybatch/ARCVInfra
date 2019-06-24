@@ -1,0 +1,7 @@
+- hosts: all
+  tasks:
+    - name: Ensure target
+      become: true
+      file:
+        path: "{{ target }}"
+        owner: "{{ ansible_ssh_user }}"

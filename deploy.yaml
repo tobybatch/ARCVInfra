@@ -1,0 +1,136 @@
+# Playbook to deploy a new instance
+- hosts: skunk
+
+  # Live laravel backend/api/static app 178.62.68.36
+  # stuff to look for
+  # - the laravel installs at /home/neontribe/arc/ARCVService
+  # - it's databases (in mysql - see  /home/neontribe/arc/ARCVService/env for access credentials)
+  # - the frontend deployments at /home/neontribe/arc/ARCVMarket
+
+  # Other things we would be sad to see go but can build again from guthub:
+
+  # Staging (46.101.18.83) is deployed via travis/CI to
+  # Market app: /var/www/voucher-staging.alexandrarose.org.uk
+  # API/Backend: /var/www/voucher-admin-staging.alexandrarose.org.uk
+
+  # ARCVMarket:
+  #     voucher-staging.alexandrarose.org.uk on 46.101.18.83
+  #     ARCVMarket on 46.101.18.83
+  #
+  #     These are both stateless? So don't really need backups.  Is that right?
+
+  tasks:
+    - name: Update apt
+      become: true
+      apt: update_cache=yes cache_valid_time=3600 force=yes
+
+    - name: Specify MySQL root password before installing
+      become: true
+      debconf:
+        name: "mysql-server"
+        question: "mysql-server/{{ item }}"
+        value: "{{ mysql_root_pass| quote }}"
+        vtype: "password"
+      with_items:
+        - root_password
+        - root_password_again
+
+    - name: Install packages
+      become: true
+      apt:
+        pkg: "{{ item }}"
+        state: latest
+      with_items:
+        - mysql-server
+        - mysql-client
+        - python-mysqldb
+        - apache2
+        - php7.2
+        - git
+        - unzip
+        - php-cli
+        - php-mbstring
+        - git
+
+    - shell: hostname
+      register: current_hostname
+
+    - name: Update root password for all root accounts
+      mysql_user:
+        name: root
+        host: "{{ item }}"
+        password: "{{ mysql_root_pass }}"
+        login_user: root
+        login_password: "{{ mysql_root_pass }}"
+        check_implicit_admin: yes
+        priv: "*.*:ALL,GRANT"
+      with_items:
+        - "{{ current_hostname.stdout | lower }}"
+        - 127.0.0.1
+        - ::1
+        - localhost
+
+    - name: Create databases
+      mysql_db:
+        name: "{{ arc_mysql_name }}"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_pass }}"
+
+    - name: Ensure anonymous users are not in the database
+      mysql_user:
+        name: ''
+        host: "{{ item }}"
+        state: absent
+        login_user: root
+        login_password: "{{ mysql_root_pass }}"
+      with_items:
+        - localhost
+        - "{{ current_hostname.stdout | lower }}"
+
+    - name: Create users
+      mysql_user:
+        name: "{{ arc_mysql_user }}"
+        password: "{{ arc_mysql_pass }}"
+        priv: "{{ arc_mysql_name }}.*:ALL"
+        state: present 
+        login_user: root
+        login_password: "{{ mysql_root_pass }}"
+
+    - set_fact:
+        target_name: "{{ archivename.split('.zip')[0] }}"
+      tags:
+        - unpack
+
+    - name: Ensure target dir
+      become: true
+      file:
+        path: /var/www/arc
+        state: directory
+        mode: 0775
+        owner: "{{ ansible_ssh_user }}"
+      tags:
+        - unpack
+
+    - name: Copy in codebase
+      unarchive:
+        src: "{{ archivename }}"
+        dest: /var/www/arc
+      tags:
+        - unpack
+
+    - set_fact:
+      app_folder: "/var/www/arc/{{ target_name }}"
+      tags:
+        - unpack
+
+
+    # Copy .env.example to .env and edit to local settings
+    # Update .env to match new settings
+    # composer install
+    # If not using Homestead or Valet - you will need to configure permissions on storage and bootstrap/cache. See Laravel 5.4 Installation for more info.
+    # import mysql
+    # install apache config, update the vhosts to match the target virtual host names
+    # install certbot and create a certificate
+    # set apapche and mysql to auto start
+    # start apache and mysql

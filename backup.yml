@@ -1,0 +1,100 @@
+# Playbook to deploy a new instance
+- hosts: live
+
+  # Live laravel backend/api/static app 178.62.68.36
+  # stuff to look for
+  # - the laravel installs at /home/neontribe/arc/ARCVService
+  # - it's databases (in mysql - see  /home/neontribe/arc/ARCVService/env for access credentials)
+  # - the frontend deployments at /home/neontribe/arc/ARCVMarket
+
+  # Other things we would be sad to see go but can build again from guthub:
+
+  # Staging (46.101.18.83) is deployed via travis/CI to
+  # Market app: /var/www/voucher-staging.alexandrarose.org.uk
+  # API/Backend: /var/www/voucher-admin-staging.alexandrarose.org.uk
+
+  # ARCVMarket:
+  #     voucher-staging.alexandrarose.org.uk on 46.101.18.83
+  #     ARCVMarket on 46.101.18.83
+  #
+  #     These are both stateless? So don't really need backups.  Is that right?
+
+  tasks:
+    - name: Update apt
+      become: true
+      apt: update_cache=yes cache_valid_time=3600 force=yes
+
+    - name: Install Mysql Python module
+      become: true
+      apt:
+        pkg: python-mysqldb
+        state: latest
+
+    - name: Prepare local apache folder
+      file:
+        path: ./backups/{{inventory_hostname}}/apache
+        state: directory
+        mode: 0775
+      delegate_to: localhost
+
+    - name: Prepare local ssl folder
+      file:
+        path: ./backups/{{inventory_hostname}}/ssl
+        state: directory
+        mode: 0775
+      delegate_to: localhost
+
+    - name: Fetch apache configs
+      synchronize:
+        mode: pull
+        copy_links: yes
+        src: /etc/apache2/sites-enabled
+        dest: ./backups/{{inventory_hostname}}/apache
+
+    - name: Tar up the SSL certs to avoid root access issues.
+      become: true
+      archive:
+        path: /etc/letsencrypt/live
+        dest: /tmp/certs.tgz
+        owner: "{{ ansible_ssh_user }}"
+
+    - name: Fetch SSL certificates
+      synchronize:
+        mode: pull
+        src: /tmp/certs.tgz
+        dest: ./backups/{{inventory_hostname}}/ssl
+
+    - name: Tidy up the remote certs.tgz
+      file:
+        path: /tmp/certs.tgz
+        state: absent
+
+    - name: Fetch the OAUth keys
+      synchronize:
+        mode: pull
+        src: "{{ arc_vouchers_install_path }}/storage/*.key"
+        dest: ./backups/{{inventory_hostname}}
+      delegate_to: localhost
+
+    - name: Fetch the env file
+      synchronize:
+        mode: pull
+        src: "{{ arc_vouchers_env_path }}"
+        dest: ./backups/{{inventory_hostname}}/env
+      delegate_to: localhost
+
+    - name: Dump the DB
+      mysql_db:
+        name: "{{ arc_mysql_name }}"
+        login_user: "{{ arc_mysql_user }}"
+        login_password: "{{ arc_mysql_pass }}"
+        state: dump
+        target: /tmp/dump.sql
+
+    - name: Fetch the SQL dump
+      synchronize:
+        mode: pull
+        src: /tmp/dump.sql
+        dest: ./backups/{{inventory_hostname}}/dump.sql
+      delegate_to: localhost
+
