@@ -1,0 +1,9 @@
+<VirtualHost *:80>
+	ServerName voucher-mail.{{ arc_domainname }}
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/arc/ARCVService-{{ arc_version[1:] }}/public
+
+	ErrorLog ${APACHE_LOG_DIR}/voucher-mail-error.log
+	CustomLog ${APACHE_LOG_DIR}/voucher-mail-access.log combined
+</VirtualHost>
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet

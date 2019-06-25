@@ -1,0 +1,114 @@
+---
+- name: Set app folder
+  set_fact:
+    app_dir: "/var/www/arc/ARCVService-{{ arc_version[1:] }}"
+
+- name: Get archive
+  get_url:
+    url: "https://github.com/neontribe/ARCVService/archive/{{ arc_version }}.zip"
+    dest: /var/tmp/arc.zip
+
+- name: "chown {{ app_dir }} to www-data user"
+  become: true
+  file:
+    path: "{{ app_dir }}"
+    owner: "{{ ansible_ssh_user }}"
+    recurse: yes
+
+- name: Unpack the codebase
+  unarchive:
+    src: /var/tmp/arc.zip
+    dest: /var/www/arc
+    remote_src: true
+
+- name: Run composer
+  shell: composer install
+  args:
+    chdir: "{{ app_dir }}"
+
+# Copy .env.example to .env and edit to local settings
+- name: Copy in the env file
+  copy:
+    src: backups/{{ arc_source }}/env
+    dest: "{{ app_dir }}/.env"
+  tags:
+    - post
+
+# Update .env to match new settings
+- name: Fix DB_DATABASE
+  lineinfile:
+    path: "{{ app_dir }}/.env"
+    regexp: '^DB_DATABASE='
+    line: "DB_DATABASE={{ arc_mysql_name }}"
+
+- name: Fix DB_USERNAME
+  lineinfile:
+    path: "{{ app_dir }}/.env"
+    regexp: '^DB_USERNAME='
+    line: "DB_USERNAME={{ arc_mysql_user }}"
+
+- name: Fix DB_PASSWORD
+  lineinfile:
+    path: "{{ app_dir }}/.env"
+    regexp: '^DB_PASSWORD='
+    line: "DB_PASSWORD={{ arc_mysql_pass }}"
+
+- name: Fix Fix APP_URL
+  lineinfile:
+    path: "{{ app_dir }}/.env"
+    regexp: '^APP_URL='
+    line: "APP_URL=https://voucher-admin.{{ arc_domainname }}"
+
+- name: Fix ARC_MARKET_URL
+  lineinfile:
+    path: "{{ app_dir }}/.env"
+    regexp: '^ARC_MARKET_URL='
+    line: "ARC_MARKET_URL=https://voucher.{{ arc_domainname }}"
+
+- name: ARC_SERVICE_DOMAIN
+  lineinfile:
+    path: "{{ app_dir }}/.env"
+    regexp: '^ARC_SERVICE_DOMAIN='
+    line: "ARC_SERVICE_DOMAIN=voucher-admin.{{ arc_domainname }}"
+
+- name: Fix ARC_STORE_DOMAIN
+  lineinfile:
+    path: "{{ app_dir }}/.env"
+    regexp: '^ARC_STORE_DOMAIN='
+    line: "ARC_STORE_DOMAIN=voucher-store.{{ arc_domainname }}"
+
+- name: chown storage to www-data user
+  become: true
+  file:
+    path: "{{ app_dir }}/storage"
+    owner: www-data
+    group: www-data
+    recurse: yes
+
+- name: chown bootstrap/cache to www-data user
+  become: true
+  file:
+    path: "{{ app_dir }}/bootstrap/cache"
+    owner: www-data
+    group: www-data
+    recurse: yes
+
+- name: Copy in sql dump
+  copy:
+    src: "backups/{{ arc_source }}/dump.sql"
+    dest: /tmp/dump.sql
+
+- name: Import sql
+  mysql_db:
+    name: "{{ arc_mysql_name }}"
+    state: import
+    target: /tmp/dump.sql
+    login_user: "{{ arc_mysql_user }}"
+    login_password: "{{ arc_mysql_pass }}"
+
+
+# install apache config, update the vhosts to match the target virtual host names
+
+# install certbot and create a certificate
+# set apapche and mysql to auto start
+# start apache and mysql

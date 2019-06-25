@@ -1,0 +1,3 @@
+[submodule "roles/composer"]
+	path = roles/composer
+	url = https://github.com/geerlingguy/ansible-role-composer.git

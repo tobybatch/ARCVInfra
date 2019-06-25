@@ -1,0 +1,18 @@
+<VirtualHost *:80>
+	ServerName voucher.{{ arc_domainname }}
+	ServerAdmin webmaster@localhost
+	DocumentRoot /var/www/arc/ARCVService-{{ arc_version[1:] }}/public
+
+	ErrorLog ${APACHE_LOG_DIR}/voucher-error.log
+	CustomLog ${APACHE_LOG_DIR}/voucher-access.log combined
+
+    RewriteEngine on
+    RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+    RewriteRule .* - [F]
+
+    <Directory /var/www/arc/ARCVService-{{ arc_version[1:] }}/public>
+        Options +FollowSymLinks
+        AllowOverride All
+    </Directory>
+</VirtualHost>
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
