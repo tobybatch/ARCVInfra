@@ -1,18 +1,84 @@
+- [Install](#install)
+  * [The inventory files(s)](#the-inventory-files-s-)
+    + [Inventory file structure](#inventory-file-structure)
+      - [Live](#live)
+      - [Skunk](#skunk)
+- [Backups](#backups)
+  * [Requirements](#requirements)
+  * [Run it](#run-it)
+- [Deploy](#deploy)
+  * [Requirements](#requirements-1)
+  * [Run it](#run-it-1)
+    + [Individual variables](#individual-variables)
+  * [Vagrant](#vagrant)
+
+## Install
+
+    git clone --recurse-submodules https://github.com/tobybatch/ARCVInfra.git 
+    apt install ansible
+
+### The inventory files(s)
+
+Ansible holds encrypted secrets in the inventory file (```inventory/arc.yml```).  This see [here](https://docs.ansible.com/ansible/latest/user_guide/playbooks_vault.html) for details about setting up vault passwords.
+
+Andy and Toby have the password.
+
+tldr; ```export ANSIBLE_VAULT_PASSWORD=HORSEVAULTSTABLEBATTERY```
+
+Now you can run all the vault commands without entering the password every time.
+
+    ansible-vault edit inventory/arc.yml
+
+#### Inventory file structure
+
+The top level keys are mandated by ansible, ```all:children``` under this are two sections.
+
+##### Live
+
+These are the servers that will be backed up by the ```backup.yaml``` playbook.  For each server listed there (```arc_live``` and ```arc_staging```) there are a number of keys.
+
+    ansible_ssh_host: a.b.c.d                 # ip address or fqdn of the remote host
+    ansible_ssh_user: username                # user to connect as, must be able to read all files
+    ansible_become_pass: password             # password to use for escalation (sudo)
+    arc_vouchers_install_path: /path/to/app   # the root of the install
+    arc_vouchers_env_path: /home/username/env # the path to the .env file for this app
+    arc_mysql_user: mysql_username            # mysql user name
+    arc_mysql_pass: mysql_password            # mysql password
+    arc_mysql_name: mysql_database_name       # mysql database name
+
+##### Skunk
+
+These are taget machines that can be used for deployments.  At the moment it contains a test vagrant machine that won't do the SSL setup as it can't resolve the certbot commands.  The second is a testing machine that will need some set up before it can be used again.
+
+    ansible_ssh_host: a.b.c.d                 # ip address or fqdn of the remote host
+    ansible_ssh_user: username                # user to connect as, must be able to read all files
+    ansible_become_pass: password             # password to use for escalation (sudo)
+    mysql_root_pass: password                 # mysql root password, to create the DB if needed
+    arc_mysql_user: mysql_username            # mysql user name 
+    arc_mysql_pass: mysql_password            # mysql password
+    arc_mysql_name: mysql_database_name       # mysql database name
+    arc_version: v1.2.3                       # The version to fetch from github (https://github.com/neontribe/ARCVService/releases)
+    arc_source: arc_live                      # The backup to deploy, ```ls backups```
+    arc_domainname: domain.name               # The doimain name to use to set up the vhost for vhost switching 
+    protocol: https                           # https|http if you choose https then the domain above should resolve to the ip of the server or certbot will fail
+    certbot_mail: sample@example.com          # The email to use for the certbot registration
+
 ## Backups
 
 ### Requirements
 
  * SSH Key on the target servers.  I can't get rsync to accept a CLI password.
- * ansible
+ * ansible on the local machine
+ * python on the remote machine
  * ```export ANSIBLE_VAULT_PASSWORD_FILE=somefile.txt```
- * Put the vault password in somefile.txt
- * The password is 
+ * Put the vault password, the inventory section above
+ * The password is known to Andy and Toby
 
 ### Run it
 
 This will backup the live and staging server.  Edit the inventory file to add another server under the ```all:children:hosts:live``` key to backup an additional machine.
 
-    ansible-playbook -i inventory/arc.yml backup.yml
+    ansible-playbook -i inventory/arc.yml --ask_vault-pass backup.yml
 
 Now check the backups directory for a directory matcing the server name.
 
@@ -27,11 +93,25 @@ The deployment script will provision a bare metal server ready for laravel/arc. 
  * SSH Key on the target servers
  * Either edit the inventory to add a new entry or override the variables on the CLI.
 
-### Inventory details
-
 ### Run it
 
-    ansible-playbook -i inventory/arc.yml --limit=TARGET --extra-vars="archivename=ARCVService-1.2.0.zip" deploy.yaml
+    ansible-playbook -i inventory/arc.yml --limit=TARGET deploy.yaml
+
+#### Individual variables
+
+Individual variables can be overriden on CLI but really, it's easier to create a new inventory, create the keys ```all:children:skunk:hosts:MYSERVER``` and create the varaibe there.  Then you can point to a different inventiry when you run the playbook.
+
+    ansible-playbook -i inventory/MYINVENTORY.yml deploy.yaml
+
+If you want to experiment with other overrides then it look something a bit like this (it's untested):
+
+    ansible-playbook \
+        -i '192.168.13.191,' \ # to use an ip add a trailing comma
+        --user tobias \
+        --ask-become-pass \
+        --ask-pass \
+        --extra-vars="arc_domainname=foo.com,protocol=http" \
+    deploy.yaml
 
 ### Vagrant
 
