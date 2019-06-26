@@ -80,11 +80,11 @@
     - voucher-store.alexandrarose.org.uk
     - voucher.alexandrarose.org.uk
 
-- name: Enable apache and mysql
-  service:
-    name: "{{ item }}"
-    state: restarted
-    enabled: true
-  with_items:
-    - apache2
-    - mysql
+      #- name: Enable apache and mysql
+      #service:
+      #name: "{{ item }}"
+      #state: restarted
+      #enabled: true
+      #with_items:
+      ##- apache2
+      #- mysql

@@ -9,9 +9,9 @@
 	# However, you must set it for any further virtual host explicitly.
 	#ServerName www.example.com
 
-	ServerName voucher-admin.alexandrarose.org.uk
+	ServerName voucher-admin.{{ arc_domainname }}
 	ServerAdmin webmaster@localhost
-	DocumentRoot /var/www/voucher-admin.alexandrarose.org.uk/public/
+	DocumentRoot /var/www/arc/ARCVService-{{ arc_version[1:] }}/public/
 
 	# Available loglevels: trace8, ..., trace1, debug, info, notice, warn,
 	# error, crit, alert, emerg.
@@ -33,13 +33,12 @@
         RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
         RewriteRule .* - [F]
 
-        <Directory /var/www/voucher-admin.alexandrarose.org.uk/public>
+        <Directory /var/www/arc/ARCVService-{{ arc_version[1:] }}/public>
             Options -Indexes +FollowSymLinks
             AllowOverride All
         </Directory>
-SSLCertificateFile /etc/letsencrypt/live/voucher-admin.alexandrarose.org.uk/fullchain.pem
-SSLCertificateKeyFile /etc/letsencrypt/live/voucher-admin.alexandrarose.org.uk/privkey.pem
-Include /etc/letsencrypt/options-ssl-apache.conf
+		SSLCertificateFile /etc/ssl/certs/ssl-cert-snakeoil.pem
+		SSLCertificateKeyFile /etc/ssl/private/ssl-cert-snakeoil.key
 </VirtualHost>
 </IfModule>
 # vim: syntax=apache ts=4 sw=4 sts=4 sr noet

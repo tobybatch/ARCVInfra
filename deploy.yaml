@@ -5,3 +5,4 @@
     - { role: composer, become: true }
     - { role: deploy-arc-server, tags: [ post ] }
     - { role: arc-apache, become: true, tags: [ apache ] }
+    - { role: certbot, become: true, tags: [ certbot ] }
