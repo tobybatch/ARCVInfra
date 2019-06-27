@@ -5,8 +5,8 @@ if [ "$(id -u)" -eq 0 ]; then
     exec sudo -H -u neontribe $0 "$@"
 fi
 
-REALPATH=$(realpath $0)/..
-WORKINGDIR=$(dirname $REALPATH)
+REALPATH=$(realpath $0)
+WORKINGDIR=$(dirname $REALPATH)/..
 cd $WORKINGDIR
 
 # Set the vault password in this file and
