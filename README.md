@@ -25,9 +25,9 @@ To set this up as an autonomous back-up golem we need to set it's install locati
     apt install ansible
     cd /opt/ARCVInfra
     # Optional actions if you want cron and logrotate
-    sudo ln -s /opt/cron/ARCVInfra/cron.daily /etc/cron.daily/ARCVInfra
-    sudo ln -s /opt/cron/ARCVInfra/cron.weekly /etc/cron.weekly/ARCVInfra
-    sudo ln -s /opt/cron/ARCVInfra/cron.monthly /etc/cron.monthly/ARCVInfra
+    sudo ln -s /opt/ARCVInfra/cron/cron.daily /etc/cron.daily/ARCVInfra
+    sudo ln -s /opt/ARCVInfra/cron/cron.weekly /etc/cron.weekly/ARCVInfra
+    sudo ln -s /opt/ARCVInfra/cron/cron.monthly /etc/cron.monthly/ARCVInfra
 
 The cron scripts expect to run as neontribe, so you'll need to create and install some keys and vault passwords.
 
