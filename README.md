@@ -14,8 +14,32 @@
 
 ## Install
 
-    git clone --recurse-submodules https://github.com/tobybatch/ARCVInfra.git 
+To install for testing/workstation use:
+
+    git clone --recurse-submodules https://github.com/tobybatch/ARCVInfra.git /opt/ARCVInfra
     apt install ansible
+
+To set this up as an autonomous back-up golem we need to set it's install location.
+
+    git clone --recurse-submodules https://github.com/tobybatch/ARCVInfra.git /opt/ARCVInfra
+    apt install ansible
+    cd /opt/ARCVInfra
+    # Optional actions if you want cron and logrotate
+    sudo ln -s /opt/ARCVInfra/cron.daily /etc/cron.daily/ARCVInfra
+    sudo ln -s /opt/ARCVInfra/cron.weekly /etc/cron.weekly/ARCVInfra
+    sudo ln -s /opt/ARCVInfra/cron.monthly /etc/cron.monthly/ARCVInfra
+    sudo ln -s /opt/ARCVInfra/logrotate /etc/logrotate.d/ARCVInfra
+
+The cron scripts expect to run as neontribe, so you'll need to create and install some keys and vault passwords.
+
+    sudo echo horsestablevaultbattery > /etc/ansible/vault_pass
+    sudo chown neontribe:root /etc/ansible/vault_pass
+    sudo chmod 440 /etc/ansible/vault_pass
+    sudo chown -R neontribe:neontribe /opt/ARCVInfra
+    sudo su - neontribe
+    ssh-keygen
+    ssh-copy-id neontribe@178.62.68.36
+    ssh-copy-id neontribe@46.101.18.83
 
 ### The inventory files(s)
 

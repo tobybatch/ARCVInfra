@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# If started as root, then re-start as user "neontribe":
+if [ "$(id -u)" -eq 0 ]; then
+    exec sudo -H -u neontribe $0 "$@"
+fi
+
+REALPATH=$(realpath $0)/..
+WORKINGDIR=$(dirname $REALPATH)
+cd $WORKINGDIR
+
+MOST_RECENT=$(ls -t archive/daily | head -n1)
+echo $MOST_RECENT
+cp archive/daily/$MOST_RECENT archive/weekly/
