@@ -12,3 +12,6 @@ cd $WORKINGDIR
 MOST_RECENT=$(ls -t archive/daily | head -n1)
 echo $MOST_RECENT
 cp archive/daily/$MOST_RECENT archive/weekly/
+find archive/weekly -mtime 31 -exec rm {} \;
+
+exit 0

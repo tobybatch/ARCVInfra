@@ -28,7 +28,6 @@ To set this up as an autonomous back-up golem we need to set it's install locati
     sudo ln -s /opt/ARCVInfra/cron.daily /etc/cron.daily/ARCVInfra
     sudo ln -s /opt/ARCVInfra/cron.weekly /etc/cron.weekly/ARCVInfra
     sudo ln -s /opt/ARCVInfra/cron.monthly /etc/cron.monthly/ARCVInfra
-    sudo ln -s /opt/ARCVInfra/logrotate /etc/logrotate.d/ARCVInfra
 
 The cron scripts expect to run as neontribe, so you'll need to create and install some keys and vault passwords.
 
