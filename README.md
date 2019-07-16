@@ -101,7 +101,7 @@ These are taget machines that can be used for deployments.  At the moment it con
 
 This will backup the live and staging server.  Edit the inventory file to add another server under the ```all:children:hosts:live``` key to backup an additional machine.
 
-    ansible-playbook -i inventory/arc.yml --ask_vault-pass backup.yml
+    ansible-playbook -i inventory/arc.yml --ask-vault-pass backup.yml
 
 Now check the backups directory for a directory matcing the server name.
 
