@@ -59,7 +59,7 @@
     regexp: '^DB_PASSWORD='
     line: "DB_PASSWORD={{ arc_mysql_pass }}"
 
-- name: Fix Fix APP_URL
+- name: Fix APP_URL
   lineinfile:
     path: "{{ app_dir }}/.env"
     regexp: '^APP_URL='
