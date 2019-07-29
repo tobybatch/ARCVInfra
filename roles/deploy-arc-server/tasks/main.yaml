@@ -7,6 +7,13 @@
   get_url:
     url: "https://github.com/neontribe/ARCVService/archive/{{ arc_version }}.zip"
     dest: /var/tmp/arc.zip
+  when: arc_commit_hash is not defined
+
+- name: Get by commit hash
+  get_url:
+     url: "https://github.com/neontribe/ARCVService/archive/{{ arc_commit_hash }}.zip"
+     dest: /var/tmp/arc.zip
+  when: arc_commit_hash is defined
 
 - name: "chown {{ app_dir }} to www-data user"
   become: true
