@@ -33,23 +33,24 @@ If you want to experiment with other overrides then it look something a bit like
 
 There is a vagrant test env.
 
-    vagrant up
     vagrant box update
+    vagrant up
     ssh-copy-id neontribe@192.168.13.191
     ansible-playbook -i inventory/arc.yml --limit=vagrant deploy.yaml
 
 
 #### Deploy a test server to vagrant
 
-    vagrant up
+
     vagrant box update
+    vagrant up
     ssh-copy-id neontribe@192.168.13.191
     ansible-playbook -i inventory/arc.yml --limit=vagrant deploy.yaml
 
 #### Deplpoy a test server of version 1.5 to vagrant
 
-    vagrant up
     vagrant box update
+    vagrant up
     ssh-copy-id neontribe@192.168.13.191
     ansible-playbook -i inventory/arc.yml --limit=vagrant --extra-vars="arc_version=v1.5.0" deploy.yaml
 
@@ -57,7 +58,7 @@ There is a vagrant test env.
 
 This is a specific PR commit hash.
 
-    vagrant up
     vagrant box update
+    vagrant up
     ssh-copy-id neontribe@192.168.13.191
     ansible-playbook -i inventory/arc.yml --limit=vagrant --extra-vars="arc_commit_hash=d2c99c89c62aae12f5e7e75647fb4cb19dd88745" deploy.yaml
