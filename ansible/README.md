@@ -7,57 +7,44 @@
 
 ## Centos/Rocky/DeadRat
 
-_NYI_
+_NYI_<-- Neil?
 
 ## MacOs
 
-_NYI_
+_NYI_ <-- Leanne?
 
 ## Windoze
 
-_NYI_
+_NYI_ <-- Nick?
 
-# Executing
+# Preparation
 
-## Preparation
-
-You need to tag the Service repo and create a release. While the tag could be anything it must start with `v`, e.g. `v1.2.3-fc.1`
+You need to tag the Service or Market repo and create a release. While the tag could be anything it must start with `v`, e.g. `v1.2.3-fc.1`
 
 If you have the github cli installed
 
 ```bash
 git checkout develop
 gh release create v1.2.3-fc.1
+git push --tags
 ```
 
 Otherwise
 
 ```bash
 git checkout develop && git tag v1.2.3-fc.1
+git push --tags
 ```
 
-Then goto https://github.com/neontribe/ARCVService/releases and create a new pelease.
+Then goto [Service](https://github.com/neontribe/ARCVService/releases) or [Market](https://github.com/neontribe/ARCVMarket/releases) and create a new release.
 
-## Deploying a tag
+# Execution
 
-This **DOES NOT** send the release live. Note the `-l arcstaging` limits the release to the staging server, it's not yet set up for live.
+To release toa given machine you will need set up public key auth with the user specified in [hosts.yml](hosts.yaml). See the [ansible docs](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html)
 
-    ansible-playbook -i hosts.yaml deploy-laravel.yml --limit arcstaging --extra-vars "tag=1.14.0" -l vagrant --ask-become-pass
+In both the cases we use `-l arcstaging` means we only release to the staging server.
 
-## Sending a release live
+In both cases you will need the thunder pants password.
 
-Not yet available via ansible.
-
-Shell onto the server, not the tag name should **NOT** have the `v` prefix.
-
-```bash
-export TAG=<INSERT TAG NAME HERE>
-cd /var/www/ARCVService/releases/ARCVService-${TAG}
-rm -rf storage
-ln -s /var/www/ARCVService/storage
-ln -s /var/www/ARCVService/service_env .env
-cd /var/www/ARCVService
-rm current_release public_html
-ln -s /var/www/ARCVService/releases/ARCVService_v${TAG} current_release
-ln -s /var/www/ARCVService/releases/ARCVService_v${TAG}/public public_html
-```
+ * [Market](DEPLOY_VUE.md)
+ * [Service/Store](DEPLOY_LARAVEL.md)

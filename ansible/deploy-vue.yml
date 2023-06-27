@@ -1,0 +1,70 @@
+- name: Playbook to release Vue (Market)
+  hosts: myservers
+  become: yes
+  tasks:
+    - name: Ensure release dir
+      file:
+        path: /var/www/ARCVMarket/releases/
+        state: directory
+
+    - name: Get release
+      ansible.builtin.get_url:
+        url: https://github.com/neontribe/ARCVMarket/archive/refs/tags/v{{ tag }}.tar.gz
+        dest: /var/tmp/release.tgz
+        mode: '0440'
+
+    - name: Unpack release
+      unarchive:
+        src: /var/tmp/release.tgz
+        dest: /var/tmp
+        remote_src: yes
+
+    - name: Set up git versions for webpack to read
+      shell: |
+        git init
+        git config --global user.email "ansible@neontribe.org"
+        git config --global user.name "Ansible Bot"
+        git commit --allow-empty --no-verify -m "chore: deploy {{ tag }}"
+      args:
+        chdir: /var/tmp/ARCVMarket-{{ tag }}
+
+    - name: Tag the build
+      shell: git tag {{ tag }}
+      args:
+        chdir: /var/tmp/ARCVMarket-{{ tag }}
+      ignore_errors: yes #  tag may alrady exist it this is a replay
+
+    - name: Yarn install
+      yarn:
+        path: /var/tmp/ARCVMarket-{{ tag }}
+
+    - name: Yarn build
+      shell: yarn build
+      args:
+        chdir: /var/tmp/ARCVMarket-{{ tag }}
+
+    # This for some reason doesn't work
+#      yarn:
+#        name: build
+#        production: true
+#        path: /var/tmp/ARCVMarket-{{ tag }}
+
+    - name: Copy built files
+      copy:
+        src: /var/tmp/ARCVMarket-{{ tag }}/dist
+        dest: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
+        remote_src: yes
+
+    - name: Ensure ownership
+      file:
+        dest: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
+        owner: root
+        group: apache
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+
+#    - name: Link in .env
+#    - name: Link in storage
+#    - name: Cache clear, Config clear, Optimise
+#    - name: Ensure ownership
+

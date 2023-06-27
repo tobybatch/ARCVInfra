@@ -72,7 +72,7 @@
 
     - name: Ensure ownership
       file:
-        dest: /foo/bar/somedir
+        dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}
         owner: root
         group: apache
         mode: u=rwX,g=rX,o=rX
