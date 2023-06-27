@@ -1,8 +1,0 @@
-# Playbook to deploy a new instance
-- hosts: skunk
-  roles:
-    - { role: provision-os }
-    - { role: composer, become: true }
-    - { role: deploy-arc-server, tags: [ post ] }
-    - { role: arc-apache, become: true, tags: [ apache ] }
-    - { role: certbot, become: true, tags: [ certbot ] }

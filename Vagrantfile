@@ -1,12 +1,14 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Testing vagrant machine, se we can test deploys locally
+
 Vagrant.configure("2") do |config|
     config.vm.define "arctest" do |arctest|
-        arctest.vm.box = "ubuntu/bionic64"
+        arctest.vm.box = "ubuntu/jammy64"
         arctest.vm.hostname = 'arctest'
 
-        arctest.vm.network "private_network", ip: "192.168.13.191"
+        arctest.vm.network "private_network", ip: "192.168.56.191"
         arctest.vm.synced_folder '.', '/vagrant', disabled: true
 
         arctest.vm.provider :virtualbox do |v|
@@ -17,7 +19,7 @@ Vagrant.configure("2") do |config|
         end
 
         arctest.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
-        
+
         arctest.vm.provision "shell", inline: <<-SHELL
             useradd neontribe -G 4,27,30,46 -p'$6$GjuExQMt1P$j8FLVoE07wNxYe10xTYO4M.uNzZgu008PujkDm6pstQEdg6SniZngi.LVPzsU8evYTqCGxikAiWWsxSpa/JaM1'
             mkdir -p /home/neontribe/.ssh
@@ -25,7 +27,7 @@ Vagrant.configure("2") do |config|
             chown -R neontribe:neontribe /home/neontribe/
             chmod 700 /home/neontribe/.ssh
             chmod 600 /home/neontribe/.ssh/authorized_keys
-            apt install -y python
+            apt install -y python-is-python3
             echo "+------------------------------------------+"
             echo "| Neontribe user created, password set to: |"
             echo "|     changeme                             |"
