@@ -19,6 +19,25 @@ _NYI_
 
 # Executing
 
+## Preparation
+
+You need to tag the Service repo and create a release. While the tag could be anything it must start with `v`, e.g. `v1.2.3-fc.1`
+
+If you have the github cli installed
+
+```bash
+git checkout develop
+gh release create v1.2.3-fc.1
+```
+
+Otherwise
+
+```bash
+git checkout develop && git tag v1.2.3-fc.1
+```
+
+Then goto https://github.com/neontribe/ARCVService/releases and create a new pelease.
+
 ## Deploying a tag
 
 This **DOES NOT** send the release live. Note the `-l arcstaging` limits the release to the staging server, it's not yet set up for live.
