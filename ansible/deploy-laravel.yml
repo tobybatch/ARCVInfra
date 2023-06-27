@@ -1,0 +1,85 @@
+- name: Playbook to release laravel (Store/Service)
+  hosts: myservers
+  become: yes
+  tasks:
+    - name: Ensure release dir
+      file:
+        path: /var/www/ARCVService/releases/
+        state: directory
+
+    - name: Get release
+      ansible.builtin.get_url:
+        url: https://github.com/neontribe/ARCVService/archive/refs/tags/v{{ tag }}.tar.gz
+        dest: /var/www/ARCVService/releases/release.tgz
+        mode: '0440'
+
+    - name: Unpack release
+      unarchive:
+        src: /var/www/ARCVService/releases/release.tgz
+        dest: /var/www/ARCVService/releases
+        remote_src: yes
+
+    - name: Clean up un-needed files
+      file:
+        path: '/var/www/ARCVService/releases/ARCVService-{{ tag }}/{{ item }}'
+        state: absent
+      with_items:
+        - .docker
+        - docker-compose.yml
+        - Dockerfile
+        - Docker.md
+        - .env.example
+        - .env.travis
+        - .gitattributes
+        - .gitignore
+        - INSTALL.md
+        - makedeploy.sh
+        - Makefile
+        - phpunit.xml
+        - README.md
+        - staging_rsa.enc
+        - UPGRADE_NOTES.md
+        - tests
+        - .travis.yml
+
+    - name: Ensure storage dirs
+      file:
+        path: /var/www/ARCVService/releases/ARCVService-{{ tag }}/{{ item }}
+        state: directory
+      with_items:
+        - storage/app
+        - storage/framework/cache
+        - storage/framework/views
+        - storage/framework/sessions
+        - storage/logs
+
+    - name: Composer install
+      composer:
+        command: install
+        working_dir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        arguments: --no-ansi
+      environment:
+        COMPOSER_ALLOW_SUPERUSER: 1
+
+    - name: Yarn install
+      yarn:
+        path: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+
+    - name: Yarn build
+      yarn:
+        name: build
+        path: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+
+    - name: Ensure ownership
+      file:
+        dest: /foo/bar/somedir
+        owner: root
+        group: apache
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+
+#    - name: Link in .env
+#    - name: Link in storage
+#    - name: Cache clear, Config clear, Optimise
+#    - name: Ensure ownership
+
