@@ -1,4 +1,11 @@
-sudo apt install vagrant virtualbox python3-is-pyton ansible
-ansible-galaxy collection install community.general
+# ARCV Infrastructure
 
-ansible-playbook -i hosts.yaml deploy-laravel.yml --limit vagrant --extra-vars "tag=1.14.0" -l vagrant --ask-become-pass
+## Ansible
+
+Usable to deploy tagged versions of Store/Service and Market.
+
+[Ansible](ansible/README.md)
+
+## Dockers
+
+Work in progress
