@@ -24,7 +24,7 @@
         path: '/var/www/ARCVService/releases/ARCVService-{{ tag }}/{{ item }}'
         state: absent
       with_items:
-        - .docker
+        - docker
         - docker-compose.yml
         - Dockerfile
         - Docker.md
