@@ -1,0 +1,28 @@
+- name: Playbook to release laravel (Store/Service)
+  hosts: myservers
+  become: yes
+
+- import_playbook: dump-db.yml
+
+  tasks:
+    - name: Link in .env
+      debug: Link in .env
+
+    - name: Link in storage
+      debug: Link in storage
+
+    - name: Link current_release
+      debug: Link current_release
+
+    - name: Link public_html
+      debug: Link public_html
+
+    - name: Run migrations
+      debug: Run migrations
+
+    - name: Cache clear, Config clear, Optimise
+      debug: Cache clear, Config clear, Optimise
+
+    - name: Ensure ownership
+      debug: Ensure ownership
+

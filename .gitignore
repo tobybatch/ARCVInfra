@@ -2,7 +2,5 @@
 *.log
 *.swp
 *.retry
-backups/
-archive
-ansible/.vaultpass
 .idea
+.ansible_vault_passwd_file
