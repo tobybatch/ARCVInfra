@@ -1,0 +1,44 @@
+- name: Playbook to dump SQL db (Store/Service)
+  hosts: myservers
+  become: yes
+
+  tasks:
+
+    - name: Ensure sql dump dir
+      file:
+        path: /var/www/ARCVService/db-dumps
+        state: directory
+
+    - name: Get current release
+      stat:
+        path: /var/www/ARCVService/current_release
+      register: sym
+
+#    - debug:
+#        var: sym.stat.lnk_source
+
+    - name: Set current release name as fact
+      set_fact:
+        current_release: "{{ sym.stat.lnk_source | basename }}"
+
+    - name: SQL dump file name as fact
+      set_fact:
+        dump_file: "/var/www/ARCVService/db-dumps/{{ current_release }}_{{ ansible_date_time.iso8601 }}.sql"
+
+    - debug:
+        var: dump_file
+
+    - name: Dump DB
+      shell: |
+        mysqldump -u {{ db_user_name }} \
+          -p"{{ db_user_password }}" \
+          -h127.0.0.1 \
+          {{ db_name }} \
+          --quick \
+          --lock-tables=false > "{{ dump_file }}.sql"
+
+#    - name: Link in env
+#    - name: Link in storage
+#    - name: Cache clear, Config clear, Optimise
+#    - name: Ensure ownership
+

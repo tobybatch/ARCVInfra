@@ -1,0 +1,39 @@
+# See Docker.md for more info...
+version: '2.1'
+services:
+
+    sqldb:
+        image: mysql:5.7
+        environment:
+            MYSQL_USER: lamp
+            MYSQL_PASSWORD: lamp
+            MYSQL_DATABASE: lamp
+            MYSQL_ROOT_PASSWORD: notSecureChangeMe
+        volumes:
+            - mysql:/var/lib/mysql
+        restart: always
+        ports:
+          - "3306:3306"
+        healthcheck:
+            test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
+            interval: 20s
+            retries: 10
+
+    mailer:
+        image: schickling/mailcatcher
+        ports:
+            - "1025:1025"
+            - "1080:1080"
+
+    phpmyadmin:
+        image: phpmyadmin
+        restart: always
+        ports:
+            - "8080:80"
+        environment:
+            PMA_HOST: sqldb
+            PMA_USER: lamp
+            PMA_PASSWORD: lamp
+
+volumes:
+    mysql:

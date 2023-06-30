@@ -5,7 +5,7 @@
 
 Vagrant.configure("2") do |config|
     config.vm.define "arctest" do |arctest|
-        arctest.vm.box = "rockylinux/9"
+        arctest.vm.box = "ubuntu/jammy64"
         arctest.vm.hostname = 'arctest'
 
         arctest.vm.network "private_network", ip: "192.168.56.191"
@@ -13,34 +13,73 @@ Vagrant.configure("2") do |config|
 
         arctest.vm.provider :virtualbox do |v|
             v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
-            v.customize ["modifyvm", :id, "--memory", 512]
+            v.customize ["modifyvm", :id, "--memory", 1024]
             v.customize ["modifyvm", :id, "--name", "arctest"]
             v.customize ["modifyvm", :id, "--cpus", "1"]
         end
 
+        arctest.vm.provision "shell", inline: "mkdir -p /opt /var/www/ARCVService/"
+
         arctest.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
+        arctest.vm.provision "file", source: "assets/docker-compose.yml", destination: "/tmp/docker-compose.yml"
+        arctest.vm.provision "file", source: "assets/node.sh", destination: "/tmp/node.sh"
+        arctest.vm.provision "file", source: "assets/env", destination: "/tmp/service_env"
 
         arctest.vm.provision "shell", inline: <<-SHELL
-            dnf update
-            dnf install -y httpd php php-{common,devel,pear,cgi,curl,mbstring,gd,mysqlnd,gettext,bcmath,json,xml,fpm,intl,zip}
-            pecl install libsodium
-            php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-            php -r "if (hash_file('sha384', 'composer-setup.php') === 'e21205b207c3ff031906575712edab6f13eb0b361f2085f1f1237b7126d785e826a450292b6cfd1d64d92e6563bbde02') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-            php composer-setup.php
-            php -r "unlink('composer-setup.php');"
-            mv composer.phar /usr/local/bin/composer
-            useradd neontribe -G 10 -p'$6$jxY9rioiXVJDR0dS$xvyvT6SInZIlPgQsECgn9KMm37VVwNfpwvSgDLVgfyRbpLfjmWzlLAvcgQjyyxsLHJXTaSr.I9AsK21Eoj6uM0' || true
+            mkdir -p /opt /var/www/ARCVService/
+            cp /tmp/docker-compose.yml /opt/docker-compose.yml
+            cp /tmp/service_env /var/www/ARCVService/service_env
+
+            apt update
+            apt upgrade -y
+            apt install -y apache2 git php mysql-client libapache2-mod-php php-mbstring php-cli php-json php-xml php-bcmath php-zip php-pdo php-common php-tokenizer php-mysql composer libsodium-dev npm docker.io docker-compose
+
+            git clone https://github.com/nvm-sh/nvm.git /opt/nvm
+            mkdir /usr/local/nvm
+            mkdir /usr/local/node
+            cp /tmp/node.sh /etc/profile.d/node.sh
+            source /etc/profile.d/node.sh
+            nvm install lts/gallium
+            nvm alias default lts/gallium
+            npm -g i yarn
+
+            systemctl enable apache2
+            systemctl enable docker
+
+            systemctl start apache2
+            systemctl start docker
+
+            mkdir -p /var/www/ARCVService/{archives,releases,storage}
+            mkdir -p /var/www/ARCVService/storage/{app,framework/cache,framework/views,framework/sessions,logs}
+
+            docker-compose -f /opt/docker-compose.yml up -d
+
+            git clone https://github.com/neontribe/ARCVService.git /var/www/ARCVService/releases/initial
+            ln -sf /var/www/ARCVService/releases/initial /var/www/ARCVService/current_release
+            ln -sf /var/www/ARCVService/releases/initial/public /var/www/ARCVService/public_html
+
+            # Create neontribe user
+            useradd neontribe -G 10,27,33 -m -s /bin/bash -p'$y$j9T$meYS16UGzh89g1xG3SBbO.$IYVlPOma/yHhprOOKlz1dLJpF42tzu1Ze0Yn5nxMQM0' || true
+
+            # Add default public key
             mkdir -p /home/neontribe/.ssh
-            echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQC/dxFUsOQ730CYMH8D4zLlUGrtC5CkkTK6tnKt9FvosmB/zRPh6A5CkveVWzHBWUq5o4LnREh/V5ov1sA2rkdJ8y6NA+obI1jL7UY/eiH7wPlvBKkNAx65WXCcsBYF3TAMkUROUMy8PB6+17f/zLjLvWQTkrzet+ptfdsKdIJqKPxWQy1JcSvukcG/VU9RWTwGY7kvWRF8dxJHWE3LUKbJiNq6xGOLsPI25fkjwW+sBi5Nmcononz3XToHtD5bl76SnlHQ43auaxp4IMPQkcLz5sZTstKxkPmBY+kUL6U9GnYc+QcxCV35H8f8wH8DfxivledBUo6gHzjEzh34s67hwlfzxkuH/DYO247XlPLxm0oPJuANzDlYdY8ly52CCPDX9sFa1mLGtP3mpp+yhTRA5M/IrPolqBDn7C3BV79GyVjB4Z6yZiRJlsaqGwxHl46wNKSA0UOjZm2DaPuFXFVHGYxwuc50a4zLGTCmQC4gmb+kKHcWtHlZ02fUUN3uxXy+1Ok+HEU9XqI3PjfrftKGkc1FGDLjD2h4I8ulPIbPslVxt8iieazAEwacGlGFHoLUSbu5l7gYjuTmCHS+kP9/vQT8n2RCU7l7PH3rQYjvWZ1RQzWrPeNeJTjmSxE1LZ/rYUV/MEBdFcBqIH4g2e+tb++x8vfzw77g6Crky2n/SQ== tobias@tobias" > /home/neontribe/.ssh/authorized_keys
-            chown -R neontribe:neontribe /home/neontribe/
+            cat /tmp/id_rsa.pub >> /home/neontribe/.ssh/authorized_keys || true
+
+            # Clean up neontribe user permisssions
+            chown -R neontribe:neontribe /home/neontribe/ /var/www/ARCVService
             chmod 700 /home/neontribe/.ssh
             chmod 600 /home/neontribe/.ssh/authorized_keys
+            chown -R www-data:www-data /var/www/ARCVService/storage/ /var/www/ARCVService/releases/*/bootstrap
+
             echo "+------------------------------------------+"
-            echo "| Neontribe user created, password set to: |"
-            echo "|     changeme                             |"
+            echo "| neontribe user created, password set to: |"
+            echo "|     Zooloander123!                       |"
+            echo "| MySQL root password:                     |"
+            echo "|     changemeplease                       |"
             echo "+------------------------------------------+"
             echo "eth1 ip address: $(ip -4 addr)"
         SHELL
+
 
         #Dir.glob("~/.ssh/*.pub") do |pubkey|
         #    arctest.vm.provision "file", source: pubkey, destination: pubkey
@@ -51,3 +90,4 @@ Vagrant.configure("2") do |config|
     end
 
 end
+

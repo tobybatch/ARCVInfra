@@ -1,0 +1,105 @@
+
+#- import_playbook: dump-db.yml
+
+- name: Playbook to release laravel (Store/Service)
+  hosts: myservers
+
+  tasks:
+
+    - name: Ensure ownership
+      file:
+        dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        owner: "{{ ansible_ssh_user }}"
+        group: "{{ ansible_ssh_user }}"
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+      become: yes
+
+    - name: Clear storage directory
+      file:
+        state: absent
+        path: /var/www/ARCVService/releases/ARCVService-{{ tag }}/storage
+      become: yes
+
+    - name: Link in .env
+      file:
+        state: link
+        src: /var/www/ARCVService/service_env
+        dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}/.env
+
+    - name: Link in storage
+      file:
+        state: link
+        src: /var/www/ARCVService/storage
+        dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}/storage
+
+    - name: Generate assets
+      shell: source /etc/profile.d/node.sh && yarn production
+      args:
+        executable: /bin/bash
+        chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+
+    - name: Link current_release
+      file:
+        state: link
+        force: true
+        src: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        dest: /var/www/ARCVService/current_release
+
+    - name: Link public_html
+      file:
+        state: link
+        force: true
+        src: /var/www/ARCVService/releases/ARCVService-{{ tag }}/public
+        dest: /var/www/ARCVService/public_html
+
+    - name: Ensure storage dirs
+      file:
+        path: /var/www/ARCVService/storage
+        state: directory
+      with_items:
+        - storage/app
+        - storage/framework/cache
+        - storage/framework/views
+        - storage/framework/sessions
+        - storage/logs
+
+    - name: Run migrations
+      shell: php artisan migrate
+      args:
+        executable: /bin/bash
+        chdir: /var/www/ARCVService/current_release
+      become: yes
+
+    - name: Cache clear, Config clear, Optimise
+      shell: php artisan {{ item }}
+      args:
+        executable: /bin/bash
+        chdir: /var/www/ARCVService/current_release
+      with_items:
+        - cache:clear
+        - config:clear
+        - optimize:clear
+      become: yes
+
+    - name: Ensure ownership (user)
+      file:
+        dest: /var/www/ARCVService/
+        owner: "{{ ansible_ssh_user }}"
+        group: "{{ ansible_ssh_user }}"
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+      become: yes
+
+    - name: Ensure ownership (web)
+      file:
+        dest: /var/www/ARCVService/{{ item }}
+        owner: "{{ webuser }}"
+        group: "{{ webuser }}"
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+      become: yes
+      with_items:
+        - storage
+        - releases/*/bootstrap
+        - current_release/bootstrap

@@ -1,21 +1,35 @@
 # Setting up Ansible
 
-## Ubuntu/Debian/PopOs
+## Installation
+
+### Ubuntu/Debian/PopOs
 
     sudo apt python3-is-pyton ansible
     ansible-galaxy collection install community.general
 
-## Centos/Rocky/DeadRat
+### Centos/Rocky/DeadRat
 
 _NYI_<-- Neil?
 
-## MacOs
+### MacOs
 
 _NYI_ <-- Leanne?
 
-## Windoze
+### Windoze
 
 _NYI_ <-- Nick?
+
+## Secrets and Vaults
+
+The `become` password for privilege escalation can be passed at runtime using `--ask-become-pass`.
+
+On a dev workstation with full disk crypto it is acceptable to store the vault password locally. Create a file called `.ansible_vault_passwd_file` and place the vault password in it as plaint text:
+
+```bash
+echo "THE VALUT PASSWORD" > .ansible_vault_passwd_file
+```
+
+The vault password is in the "Neontribe 1pass" under ARC vault password
 
 # Preparation
 
