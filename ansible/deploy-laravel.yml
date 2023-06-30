@@ -77,6 +77,12 @@
         executable: /bin/bash
         chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
 
+    - name: Update version.txt
+      shell: echo {{ tag }} > version.txt
+      args:
+        executable: /bin/bash
+        chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+
     - name: Ensure ownership
       file:
         dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}
