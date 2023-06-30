@@ -32,7 +32,7 @@ Vagrant.configure("2") do |config|
 
             apt update
             apt upgrade -y
-            apt install -y apache2 git php libapache2-mod-php php-mbstring php-cli php-json php-xml php-bcmath php-zip php-pdo php-common php-tokenizer php-mysql composer libsodium-dev npm docker.io docker-compose
+            apt install -y apache2 git php mysql-client libapache2-mod-php php-mbstring php-cli php-json php-xml php-bcmath php-zip php-pdo php-common php-tokenizer php-mysql composer libsodium-dev npm docker.io docker-compose
 
             git clone https://github.com/nvm-sh/nvm.git /opt/nvm
             mkdir /usr/local/nvm
@@ -50,12 +50,13 @@ Vagrant.configure("2") do |config|
             systemctl start docker
 
             mkdir -p /var/www/ARCVService/{archives,releases,storage}
+            mkdir -p /var/www/ARCVService/storage/{app,framework/cache,framework/views,framework/sessions,logs}
 
             docker-compose -f /opt/docker-compose.yml up -d
 
             git clone https://github.com/neontribe/ARCVService.git /var/www/ARCVService/releases/initial
             ln -sf /var/www/ARCVService/releases/initial /var/www/ARCVService/current_release
-            ln -sf /var/www/ARCVService/releases/initial/public /var/www/ARCVService/current_release/public_html
+            ln -sf /var/www/ARCVService/releases/initial/public /var/www/ARCVService/public_html
 
             # Create neontribe user
             useradd neontribe -G 10,27,33 -m -s /bin/bash -p'$y$j9T$meYS16UGzh89g1xG3SBbO.$IYVlPOma/yHhprOOKlz1dLJpF42tzu1Ze0Yn5nxMQM0' || true

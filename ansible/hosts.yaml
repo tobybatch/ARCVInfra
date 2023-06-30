@@ -7,12 +7,12 @@ myservers:
       db_user_name: lamp
       db_name: lamp
       webuser: www-data
-    arcstaging:
-      ansible_host: 138.68.180.157
-      ansible_port: 22
-      ansible_ssh_user: neontribe
-      db_user_name: arcv
-      db_name: arcv
-      webuser: apache
+#    arcstaging:
+#      ansible_host: 138.68.180.157
+#      ansible_port: 22
+#      ansible_ssh_user: neontribe
+#      db_user_name: arcv
+#      db_name: arcv
+#      webuser: apache
   vars:
     http_port: "80"

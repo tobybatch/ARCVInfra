@@ -12,7 +12,7 @@
       become: yes
 
     - name: Get release
-      ansible.builtin.get_url:
+      get_url:
         url: https://github.com/neontribe/ARCVService/archive/refs/tags/v{{ tag }}.tar.gz
         dest: /var/www/ARCVService/releases/release-v{{ tag }}.tgz
         mode: '0664'
@@ -66,13 +66,13 @@
         COMPOSER_ALLOW_SUPERUSER: 1
 
     - name: Yarn install
-      shell: yarn
+      shell: source /etc/profile.d/node.sh && yarn
       args:
         executable: /bin/bash
         chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
 
     - name: Yarn build
-      shell: yarn production
+      shell: source /etc/profile.d/node.sh && yarn production
       args:
         executable: /bin/bash
         chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
@@ -85,9 +85,3 @@
         mode: u=rwX,g=rX,o=rX
         recurse: yes
       become: yes
-
-#    - name: Link in env
-#    - name: Link in storage
-#    - name: Cache clear, Config clear, Optimise
-#    - name: Ensure ownership
-

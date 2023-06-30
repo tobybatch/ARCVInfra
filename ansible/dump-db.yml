@@ -32,6 +32,7 @@
       shell: |
         mysqldump -u {{ db_user_name }} \
           -p"{{ db_user_password }}" \
+          -h127.0.0.1 \
           {{ db_name }} \
           --quick \
           --lock-tables=false > "{{ dump_file }}.sql"

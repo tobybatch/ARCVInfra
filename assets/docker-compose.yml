@@ -13,7 +13,7 @@ services:
             - mysql:/var/lib/mysql
         restart: always
         ports:
-          - "${SQLDB_PORT:-3336}:3306"
+          - "3306:3306"
         healthcheck:
             test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
             interval: 20s
@@ -22,14 +22,14 @@ services:
     mailer:
         image: schickling/mailcatcher
         ports:
-            - "${MAILER_SMTP_PORT:-1025}:1025"
-            - "${MAILER_ADMIN_PORT:-1080}:1080"
+            - "1025:1025"
+            - "1080:1080"
 
     phpmyadmin:
         image: phpmyadmin
         restart: always
         ports:
-            - "${PHPMYADMIN_PORT:-8800}:80"
+            - "8080:80"
         environment:
             PMA_HOST: sqldb
             PMA_USER: lamp

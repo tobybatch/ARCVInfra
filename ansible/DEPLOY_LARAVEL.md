@@ -8,9 +8,13 @@ First tag the repo
     gh release create v1.2.3-fc.1
     git push --tags
 
-The create it
+Then deploy it, this one goes to a local vagrant machine
 
-    ansible-playbook -i hosts.yaml -i vault.yml deploy-laravel.yml --limit arcstaging --extra-vars "tag=1.16.0-rc.1" -l arcstaging # --ask-become-pass
+    ansible-playbook -i hosts.yaml -i vault.yml deploy-laravel.yml --extra-vars "tag=1.16.0-rc.3" -l vagrant
+
+This one goes to staging:
+
+    ansible-playbook -i hosts.yaml -i vault.yml deploy-laravel.yml --extra-vars "tag=1.16.0-rc.3" -l arcstaging
 
 # Sending a release live
 
