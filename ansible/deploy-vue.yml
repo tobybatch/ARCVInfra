@@ -63,7 +63,7 @@
         mode: u=rwX,g=rX,o=rX
         recurse: yes
 
-#    - name: Link in .env
+#    - name: Link in env
 #    - name: Link in storage
 #    - name: Cache clear, Config clear, Optimise
 #    - name: Ensure ownership

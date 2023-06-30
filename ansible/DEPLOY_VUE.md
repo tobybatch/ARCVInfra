@@ -15,7 +15,7 @@ export TAG=<INSERT TAG NAME HERE>
 cd /var/www/ARCVService/releases/ARCVService-${TAG}
 rm -rf storage
 ln -s /var/www/ARCVService/storage
-ln -s /var/www/ARCVService/service_env .env
+ln -s /var/www/ARCVService/service_env env
 cd /var/www/ARCVService
 rm current_release public_html
 ln -s /var/www/ARCVService/releases/ARCVService_v${TAG} current_release

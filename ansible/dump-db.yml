@@ -36,7 +36,7 @@
           --quick \
           --lock-tables=false > "{{ dump_file }}.sql"
 
-#    - name: Link in .env
+#    - name: Link in env
 #    - name: Link in storage
 #    - name: Cache clear, Config clear, Optimise
 #    - name: Ensure ownership

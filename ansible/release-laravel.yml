@@ -5,17 +5,43 @@
 - import_playbook: dump-db.yml
 
   tasks:
+
+    - name: Clear storage directory
+      file:
+        state: absent
+        src: /var/www/ARCVService/releases/ARCVService-{{ tag }}/storage
+
     - name: Link in .env
-      debug: Link in .env
+      file:
+        state: link
+        src: /var/www/ARCVService/service_env
+        dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}/.env
 
     - name: Link in storage
-      debug: Link in storage
+      file:
+        state: link
+        src: /var/www/ARCVService/storage
+        dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}/storage
+
+    - name: Generate assets
+      shell: yarn production
+      args:
+        executable: /bin/bash
+        chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
 
     - name: Link current_release
-      debug: Link current_release
+      file:
+        state: link
+        force: true
+        src: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        dest: /var/www/ARCVService/current_release
 
     - name: Link public_html
-      debug: Link public_html
+      file:
+        state: link
+        force: true
+        src: /var/www/ARCVService/releases/ARCVService-{{ tag }}/public
+        dest: /var/www/ARCVService/public_html
 
     - name: Run migrations
       debug: Run migrations
