@@ -80,6 +80,14 @@ Vagrant.configure("2") do |config|
             echo "eth1 ip address: $(ip -4 addr)"
         SHELL
 
+        arctest.vm.provision "file", source: "assets/apache-sites.conf", destination: "/etc/apache2/sites-available/arc.conf"
+
+        arctest.vm.provision "shell", inline: <<-SHELL
+            a2ensite arc
+            a2enmod rewrite vhost_alias
+            a2dissite 000-default.conf
+            systemctl reload apache2
+        SHELL
 
         #Dir.glob("~/.ssh/*.pub") do |pubkey|
         #    arctest.vm.provision "file", source: pubkey, destination: pubkey

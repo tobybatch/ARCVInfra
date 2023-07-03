@@ -54,11 +54,33 @@ Then goto [Service](https://github.com/neontribe/ARCVService/releases) or [Marke
 
 # Execution
 
-To release toa given machine you will need set up public key auth with the user specified in [hosts.yml](hosts.yaml). See the [ansible docs](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html)
+All commands are location relative, so before you start:
 
-In both the cases we use `-l arcstaging` means we only release to the staging server.
+```bash
+cd ansible
+```
 
-In both cases you will need the thunder pants password.
+To release to a given machine you will need set up public key auth with the user specified in [hosts.yml](hosts.yaml). See the [ansible docs](https://docs.ansible.com/ansible/latest/inventory_guide/connection_details.html)
+
+## Passwords
+
+At certain times we need to `sudo` stuff. To provide the sudo password use the `--ask-become-pass` and you will be prompted for the thunder pants password. This is detailed in the [ansible docs, privilege escalation](https://docs.ansible.com/ansible/latest/playbook_guide/playbooks_privilege_escalation.html#become-command-line-options).
+
+## Vaults
+
+Hey but typing in passwords is for dweebs! Too right kido, we can use a vault to securely store sensitive data and Toby has done just that. Ansible has a secure storage mechanism built in, [ansible docs, vaults](https://docs.ansible.com/ansible/latest/vault_guide/index.html). 
+
+In practice this means that if you are on a full disk crypto dev machine you can store the vault password in a file called `.ansible_vault_passwd_file` in the same folder as this readme.
+
+**ONLY DO THIS ON COMPUTERS WITH FULL DISK CRYPTO**
+
+The vault password is in the Neontribe 1pass, or you can ask another developer for it.
+
+## Targets
+
+In both the cases we use `--limit TARGET` means we only release to a single server. [ansible docs, patterns and targeting](https://docs.ansible.com/ansible/latest/inventory_guide/intro_patterns.html#patterns-and-ansible-playbook-flags)
+
+# Specifics and Examples
 
  * [Market](DEPLOY_VUE.md)
  * [Service/Store](DEPLOY_LARAVEL.md)

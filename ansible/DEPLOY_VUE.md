@@ -1,23 +1,13 @@
 # Deploying a tag
 
-This **DOES NOT** send the release live. Note the `-l arcstaging` limits the release to the staging server, it's not yet set up for live.
+This **DOES NOT** send the release live. Note the `--limit arcstaging` limits the release to the staging server, it's not yet set up for live.
 
-    ansible-playbook -i hosts.yaml deploy-vue.yml --limit arcstaging --extra-vars "tag=1.7.0-rc.1" -l arcstaging --ask-become-pass
+    export TAG=1.7.0-rc.1
+    ansible-playbook -i hosts.yaml -i vault.yml deploy-vue.yml --extra-vars "tag=$TAG" --limit vagrant 
 
 ## Sending a release live
 
-Not yet available via ansible.
+# Sending a release live
 
-Shell onto the server, not the tag name should **NOT** have the `v` prefix.
-
-```bash
-export TAG=<INSERT TAG NAME HERE>
-cd /var/www/ARCVService/releases/ARCVService-${TAG}
-rm -rf storage
-ln -s /var/www/ARCVService/storage
-ln -s /var/www/ARCVService/service_env env
-cd /var/www/ARCVService
-rm current_release public_html
-ln -s /var/www/ARCVService/releases/ARCVService_v${TAG} current_release
-ln -s /var/www/ARCVService/releases/ARCVService_v${TAG}/public public_html
-```
+    export TAG=1.7.0-rc.1
+    ansible-playbook -i hosts.yaml -i vault.yml release-vue.yml --extra-vars "tag=$TAG" --limit vagrant

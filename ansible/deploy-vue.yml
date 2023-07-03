@@ -28,19 +28,16 @@
       args:
         chdir: /var/tmp/ARCVMarket-{{ tag }}
 
-    - name: Tag the build
-      shell: git tag {{ tag }}
-      args:
-        chdir: /var/tmp/ARCVMarket-{{ tag }}
-      ignore_errors: yes #  tag may alrady exist it this is a replay
-
     - name: Yarn install
-      yarn:
-        path: /var/tmp/ARCVMarket-{{ tag }}
+      shell: source /etc/profile.d/node.sh && yarn
+      args:
+        executable: /bin/bash
+        chdir: /var/tmp/ARCVMarket-{{ tag }}
 
     - name: Yarn build
-      shell: yarn build
+      shell: source /etc/profile.d/node.sh && yarn build
       args:
+        executable: /bin/bash
         chdir: /var/tmp/ARCVMarket-{{ tag }}
 
     # This for some reason doesn't work
@@ -51,15 +48,15 @@
 
     - name: Copy built files
       copy:
-        src: /var/tmp/ARCVMarket-{{ tag }}/dist
+        src: /var/tmp/ARCVMarket-{{ tag }}/dist/
         dest: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
         remote_src: yes
 
     - name: Ensure ownership
       file:
         dest: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
-        owner: root
-        group: apache
+        owner: "{{ webuser }}"
+        group: "{{ webuser }}"
         mode: u=rwX,g=rX,o=rX
         recurse: yes
 

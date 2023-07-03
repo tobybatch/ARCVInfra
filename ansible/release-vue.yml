@@ -19,6 +19,14 @@
       file:
         state: link
         force: true
-        src: /var/www/ARCVMarket/releases/v{{ tag }}
+        src: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
         dest: /var/www/ARCVMarket/public_html
 
+    - name: Ensure ownership
+      file:
+        dest: /var/www/ARCVMarket
+        owner: "{{ webuser }}"
+        group: "{{ webuser }}"
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+      become: yes
