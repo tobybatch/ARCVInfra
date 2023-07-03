@@ -22,7 +22,7 @@
     - name: Set up git versions for webpack to read
       shell: |
         git init
-        git config --global user.email "ansible@neontribe.org"
+        git config --global user.email 'ansible@neontribe.org'
         git config --global user.name "Ansible Bot"
         git commit --allow-empty --no-verify -m "chore: deploy {{ tag }}"
       args:
@@ -63,8 +63,4 @@
         mode: u=rwX,g=rX,o=rX
         recurse: yes
 
-#    - name: Link in env
-#    - name: Link in storage
-#    - name: Cache clear, Config clear, Optimise
-#    - name: Ensure ownership
 

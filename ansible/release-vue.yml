@@ -1,0 +1,24 @@
+
+#- import_playbook: dump-db.yml
+
+- name: Playbook to release vue (Market)
+  hosts: myservers
+
+  tasks:
+
+    - name: Ensure ownership
+      file:
+        dest: /var/www/ARCVMarket
+        owner: "{{ ansible_ssh_user }}"
+        group: "{{ ansible_ssh_user }}"
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+      become: yes
+
+    - name: Link public_html
+      file:
+        state: link
+        force: true
+        src: /var/www/ARCVMarket/releases/v{{ tag }}
+        dest: /var/www/ARCVMarket/public_html
+
