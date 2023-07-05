@@ -1,5 +1,6 @@
 - name: Playbook to release laravel (Store/Service)
   hosts: myservers
+  become: yes
   tasks:
     - name: Ensure release dir
       file:
@@ -8,7 +9,6 @@
         owner: "{{ ansible_ssh_user }}"
         group: "{{ ansible_ssh_user }}"
         mode: u=rwX,g=rX,o=rX
-        recurse: yes
       become: yes
 
     - name: Get release
@@ -66,13 +66,13 @@
         COMPOSER_ALLOW_SUPERUSER: 1
 
     - name: Yarn install
-      shell: source /etc/profile.d/node.sh && yarn
+      shell: yarn
       args:
         executable: /bin/bash
         chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
 
     - name: Yarn build
-      shell: source /etc/profile.d/node.sh && yarn production
+      shell: yarn production
       args:
         executable: /bin/bash
         chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
@@ -82,12 +82,3 @@
       args:
         executable: /bin/bash
         chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
-
-    - name: Ensure ownership
-      file:
-        dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}
-        owner: "{{ webuser }}"
-        group: "{{ webuser }}"
-        mode: u=rwX,g=rX,o=rX
-        recurse: yes
-      become: yes

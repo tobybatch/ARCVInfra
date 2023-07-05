@@ -29,13 +29,13 @@
         chdir: /var/tmp/ARCVMarket-{{ tag }}
 
     - name: Yarn install
-      shell: source /etc/profile.d/node.sh && yarn
+      shell: yarn
       args:
         executable: /bin/bash
         chdir: /var/tmp/ARCVMarket-{{ tag }}
 
     - name: Yarn build
-      shell: source /etc/profile.d/node.sh && yarn build
+      shell: yarn build
       args:
         executable: /bin/bash
         chdir: /var/tmp/ARCVMarket-{{ tag }}
