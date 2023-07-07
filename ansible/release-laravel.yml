@@ -66,6 +66,8 @@
         - cache:clear
         - config:clear
         - optimize:clear
+        - view:clear
+        - clear-compiled
       become: yes
 
     - name: Ensure ownership (web)
