@@ -83,3 +83,5 @@
         - current_release/bootstrap
         - /var/www/ARCVService/releases/ARCVService-{{ tag }}/bootstrap
         - /var/www/ARCVService/releases/ARCVService-{{ tag }}/storage
+
+# if still serving old version reboot to clear caches until we figure out what its malfunction is
