@@ -22,6 +22,8 @@
         src: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
         dest: /var/www/ARCVMarket/public_html
 
+# link in htaccess
+
     - name: Ensure ownership
       file:
         dest: /var/www/ARCVMarket
