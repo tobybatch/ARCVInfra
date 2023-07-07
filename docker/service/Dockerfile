@@ -109,6 +109,7 @@ RUN ln -snf /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && echo ${TIMEZONE} >
     chown -R www-data:www-data /composer
 COPY entry-point.sh /entry-point.sh
 COPY dbtest.php /dbtest.php
+COPY passport-install.php /passport-install.php
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 COPY --from=php-ext-xsl /usr/local/etc/php/conf.d/docker-php-ext-xsl.ini /usr/local/etc/php/conf.d/docker-php-ext-xsl.ini
 COPY --from=php-ext-xsl /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xsl.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xsl.so

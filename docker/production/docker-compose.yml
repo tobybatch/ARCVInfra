@@ -42,6 +42,7 @@ services:
       context: ../service
     image: arc:fpm-dev
     environment:
+      BRANCH: ${BRANCH:-develop}
       DB_DATABASE: ${DOCKER_DB_DATABASE:-arc}
       DB_HOST: ${DOCKER_DB_HOST:-sqldb}
       DB_PASSWORD: ${DOCKER_DB_PASSWORD:-changem3please}

@@ -19,25 +19,20 @@ function handleStartup() {
       echo "You need to mount one into this container or the system cannot proceed."
       exit 1
     fi
-    grep APP_KEY .env
-    # shellcheck disable=SC2181
-    if [ "$?" != 0 ]; then
-      echo "APP_KEY=''" > .env
-      php /opt/project/artisan key:generate
-    fi
+  fi
+  
+  grep APP_KEY .env
+  # shellcheck disable=SC2181
+  if [ "$?" != 0 ]; then
+    echo "APP_KEY=''" > .env
+    php /opt/project/artisan key:generate
   fi
 
   # These are idempotent, run them anyway
   php /opt/project/artisan migrate
   chmod 600 /opt/project/storage/*.key
 
-  # If this is the first run, we won't
-  grep PASSWORD_CLIENT_SECRET .env > /dev/null
-  # shellcheck disable=SC2181
-  if [ "$?" != 0 ]; then
-    echo -n PASSWORD_CLIENT_SECRET= >> /opt/project/.env
-    php artisan passport:install|tail -n1|awk '{print $3}'>>.env
-  fi
+  php /passport-install.php
 
   if [ -e /docker-entrypoint-initdb.d ]; then
     for filename in /docker-entrypoint-init.d/*; do
