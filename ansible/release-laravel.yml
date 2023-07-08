@@ -63,10 +63,10 @@
         executable: /bin/bash
         chdir: /var/www/ARCVService/current_release
       with_items:
-        - cache:clear
-        - config:clear
-        - optimize:clear
-        - view:clear
+        # - cache:clear
+        # - config:clear
+        # - optimize:clear
+        # - view:clear
         - clear-compiled
       become: yes
 
