@@ -10,8 +10,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${DOCKER_DB_ROOT:-reallychangethisplease}
 #    ports: # Uncomment this to expose your DB on port 3336
 #      - 3336:3306
-    volumes:
-      - mysql:/var/lib/mysql
+#    volumes:
 #        Any sql or sh files in this folder (e.g. db restore) are run on initialisation
 #        See https://hub.docker.com/_/mysql -> Initializing a fresh instance
 #      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
@@ -37,20 +36,27 @@ services:
   arc:
     build:
       context: ../service
+      target: dev
     image: arc:fpm-dev
     environment:
+      APP_ENV: "local"
+      RUN_AS: "10001:50"
       BRANCH: ${BRANCH:-develop}
       DB_DATABASE: ${DOCKER_DB_DATABASE:-arc}
       DB_HOST: ${DOCKER_DB_HOST:-sqldb}
       DB_PASSWORD: ${DOCKER_DB_PASSWORD:-changem3please}
       DB_PORT: ${DOCKER_DB_PORT:-3306}
       DB_USERNAME: ${DOCKER_DB_USERNAME:-arc}
-      RUN_AS: "10001:50"
     volumes:
       - public:/opt/project/public
+      - ${APP_ROOT}/app:/opt/project/app
+      - ${APP_ROOT}/config:/opt/project/config
+      - ${APP_ROOT}/database:/opt/project/database
+      - ${APP_ROOT}/resources:/opt/project/resources
+      - ${APP_ROOT}/routes:/opt/project/routes
+      - ${APP_ROOT}/tests:/opt/project/tests
       # .sh files in this dir will be executed on startup after migrations are run
       - ./docker-entrypoint-init.d:/docker-entrypoint-init.d
-      - ./container.env:/opt/project/.env
       # Needed if we want to save passport key
       # - ./.env:/opt/arc/ # touch .env before starting
     restart: unless-stopped

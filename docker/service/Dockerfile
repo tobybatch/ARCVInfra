@@ -27,6 +27,7 @@ RUN apk add --no-cache \
     libc-dev \
     libgomp \
     libmagic \
+    linux-headers \
     m4 \
     make \
     mpc1 \
@@ -68,6 +69,10 @@ RUN docker-php-ext-install -j$(nproc) xsl
 FROM fpm-php-ext-base AS php-ext-opcache
 RUN docker-php-ext-install -j$(nproc) opcache
 
+FROM fpm-php-ext-base AS php-ext-xdebug
+RUN apk add --no-cache $PHPIZE_DEPS \
+    && pecl install xdebug \
+    && docker-php-ext-enable xdebug
 
 FROM php:${PHP_VER}-fpm-alpine AS fpm-base
 ARG BRANCH
@@ -165,6 +170,7 @@ ENV MAIL_TO_ADMIN_ADDRESS=to@example.com
 ENV MAIL_TO_ADMIN_NAME='Admin Name'
 ENV MAIL_TO_DEVELOPER_TEAM=arc@neontribe.co.uk
 ENV MAIL_TO_DEVELOPER_NAME='User Support'
+ENV RUN_AS=""
 VOLUME [ "/opt/project/storage" ]
 ENTRYPOINT /entry-point.sh
 
@@ -172,14 +178,17 @@ ENTRYPOINT /entry-point.sh
 FROM base AS dev
 # copy kimai develop source
 COPY --from=git-dev --chown=www-data:www-data /opt/project /opt/project
-RUN echo \$PATH
+COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+COPY --from=php-ext-xdebug /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+COPY --from=php-ext-xdebug /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
 RUN \
     export COMPOSER_HOME=/composer && \
     composer --no-ansi install --working-dir=/opt/project --optimize-autoloader && \
     composer --no-ansi clearcache && \
     cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini && \
     chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
-    chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini
+    chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
+    echo "error_reporting=E_ALL" > /usr/local/etc/php/conf.d/error_reporting.ini
 ENV APP_ENV=dev
 ENV memory_limit=256M
 
