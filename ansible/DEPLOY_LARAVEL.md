@@ -6,7 +6,7 @@ First tag the repo
 
     export TAG="v1.2.3-fc.1"
     git checkout develop
-    gh release create $TAG
+    gh release create --generate-notes $TAG
 
 This one goes to staging:
 

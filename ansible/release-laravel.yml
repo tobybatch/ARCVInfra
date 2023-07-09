@@ -7,38 +7,42 @@
 
   tasks:
 
+    - name: Set deploy dir
+      set_fact:
+        release_dir: "/var/www/ARCVService/releases/ARCVService-{{ tag }}"
+        
     - name: Clear storage directory
       file:
         state: absent
-        path: /var/www/ARCVService/releases/ARCVService-{{ tag }}/storage
+        path: "{{ release_dir }}/storage"
       become: yes
 
     - name: Link in .env
       file:
         state: link
         src: /var/www/ARCVService/service_env
-        dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}/.env
+        dest: "{{ release_dir }}/.env"
       become: yes
 
     - name: Link in storage
       file:
         state: link
         src: /var/www/ARCVService/storage
-        dest: /var/www/ARCVService/releases/ARCVService-{{ tag }}/storage
+        dest: "{{ release_dir }}/storage"
       become: yes
 
     - name: Generate assets
       shell: yarn production
       args:
         executable: /bin/bash
-        chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        chdir: "{{ release_dir }}"
       become: yes
 
     - name: Link current_release
       file:
         state: link
         force: true
-        src: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        src: "{{ release_dir }}"
         dest: /var/www/ARCVService/current_release
       become: yes
 
@@ -46,7 +50,7 @@
       file:
         state: link
         force: true
-        src: /var/www/ARCVService/releases/ARCVService-{{ tag }}/public
+        src: "{{ release_dir }}/public"
         dest: /var/www/ARCVService/public_html
       become: yes
 
@@ -63,14 +67,14 @@
         executable: /bin/bash
         chdir: /var/www/ARCVService/current_release
       with_items:
-        # - cache:clear
-        # - config:clear
-        # - optimize:clear
-        # - view:clear
+        - cache:clear
+        - config:clear
+        - optimize:clear
+        - view:clear
         - clear-compiled
       become: yes
 
-    - name: Ensure ownership (web)
+    - name: Ensure folder ownership (web)
       file:
         dest: /var/www/ARCVService/{{ item }}
         owner: "{{ webuser }}"
@@ -81,7 +85,17 @@
       with_items:
         - storage
         - current_release/bootstrap
-        - /var/www/ARCVService/releases/ARCVService-{{ tag }}/bootstrap
-        - /var/www/ARCVService/releases/ARCVService-{{ tag }}/storage
+        - "{{ release_dir }}/bootstrap"
+        - "{{ release_dir }}/storage"
 
-# if still serving old version reboot to clear caches until we figure out what its malfunction is
+    - name: Ensure .env ownership (web)
+      file:
+        dest: "{{ item }}"
+        owner: "{{ webuser }}"
+        group: "{{ webuser }}"
+        mode: u=rwX,g=rX,o=rX
+      become: yes
+      with_items:
+        - "{{ release_dir }}/version.txt"
+        - "{{ release_dir }}/storage"
+

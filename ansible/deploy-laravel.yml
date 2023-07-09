@@ -2,9 +2,14 @@
   hosts: myservers
   become: yes
   tasks:
+
+    - name: Set deploy dir
+      set_fact:
+        release_dir: "/var/www/ARCVService/releases/ARCVService-{{ tag }}"
+
     - name: Ensure release dir
       file:
-        path: /var/www/ARCVService/releases
+        path: "{{ release_dir }}"
         state: directory
         owner: "{{ ansible_ssh_user }}"
         group: "{{ ansible_ssh_user }}"
@@ -13,19 +18,21 @@
 
     - name: Get release
       get_url:
-        url: https://github.com/neontribe/ARCVService/archive/refs/tags/v{{ tag }}.tar.gz
-        dest: /var/www/ARCVService/releases/release-v{{ tag }}.tgz
+        url: https://github.com/neontribe/ARCVService/archive/refs/tags/{{ tag }}.tar.gz
+        dest: /tmp/release-{{ tag }}.tgz
         mode: '0664'
 
     - name: Unpack release
       unarchive:
-        src: /var/www/ARCVService/releases/release-v{{ tag }}.tgz
-        dest: /var/www/ARCVService/releases
+        src: /tmp/release-{{ tag }}.tgz
+        dest: "{{ release_dir }}"
+        extra_opts:
+          - "--strip-components=1"
         remote_src: yes
 
     - name: Clean up un-needed files
       file:
-        path: '/var/www/ARCVService/releases/ARCVService-{{ tag }}/{{ item }}'
+        path: "{{ release_dir }}/{{ item }}"
         state: absent
       with_items:
         - .docker
@@ -48,7 +55,7 @@
 
     - name: Ensure storage dirs
       file:
-        path: /var/www/ARCVService/releases/ARCVService-{{ tag }}/{{ item }}
+        path: "{{ release_dir }}/{{ item }}"
         state: directory
       with_items:
         - storage/app
@@ -60,7 +67,7 @@
     - name: Composer install
       composer:
         command: install
-        working_dir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        working_dir: "{{ release_dir }}"
         arguments: --no-ansi
       environment:
         COMPOSER_ALLOW_SUPERUSER: 1
@@ -69,16 +76,25 @@
       shell: yarn
       args:
         executable: /bin/bash
-        chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        chdir: "{{ release_dir }}"
 
     - name: Yarn build
       shell: yarn production
       args:
         executable: /bin/bash
-        chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        chdir: "{{ release_dir }}"
 
     - name: Update version.txt
       shell: "echo {{ tag }} > version.txt"
       args:
         executable: /bin/bash
-        chdir: /var/www/ARCVService/releases/ARCVService-{{ tag }}
+        chdir: "{{ release_dir }}"
+
+    - name: Ensure ownership (web)
+      file:
+        dest: "{{ release_dir }}"
+        owner: "{{ webuser }}"
+        group: "{{ webuser }}"
+        mode: u=rwX,g=rX,o=rX
+        recurse: yes
+      become: yes
