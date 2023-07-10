@@ -4,7 +4,7 @@ This **DOES NOT** send the release live. Note the `-l arcstaging` limits the rel
 
 First tag the repo
 
-    export TAG="v1.2.3-fc.1"
+    export TAG="1.2.3-fc.1" # DO NOT ADD THE `v` AT THE FRONT
     git checkout develop
     gh release create --generate-notes $TAG
 
