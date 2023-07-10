@@ -9,6 +9,7 @@ Vagrant.configure("2") do |config|
         arctest.vm.hostname = 'arctest'
 
         arctest.vm.network "private_network", ip: "192.168.56.191"
+        config.vm.network "forwarded_port", guest: 80, host: 7999
         arctest.vm.synced_folder '.', '/vagrant', disabled: true
 
         arctest.vm.provider :virtualbox do |v|
@@ -24,6 +25,7 @@ Vagrant.configure("2") do |config|
         arctest.vm.provision "file", source: "assets/env", destination: "/tmp/service_env"
         arctest.vm.provision "file", source: "assets/grants.sql", destination: "/tmp/grants.sql"
         arctest.vm.provision "file", source: "assets/apache-sites.conf", destination: "/tmp/arc.conf"
+        arctest.vm.provision "file", source: "assets/htaccess", destination: "/tmp/htaccess"
 
         arctest.vm.provision "shell", inline: <<-SHELL
             mkdir -p /opt /var/www/ARCVService/ /docker-entrypoint-initdb.d
@@ -53,9 +55,10 @@ Vagrant.configure("2") do |config|
             systemctl start apache2
             systemctl start docker
 
-            mkdir -p /var/www/ARCVService/{archives,releases,storage}
+            mkdir -p /var/www/ARCVService/{archives,releases,storage} /var/www/ARCVMarket
             mkdir -p /var/www/ARCVService/storage/{app,framework/cache,framework/views,framework/sessions,logs}
 
+            mv /tmp/htaccess /var/www/ARCVMarket/htaccess
             mv /tmp/docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
             docker-compose -f /opt/docker-compose.yml up -d
 
