@@ -1,0 +1,64 @@
+
+# - import_playbook: dump-db.yml
+
+- name: Playbook to release laravel (Store/Service)
+  hosts: myservers
+  become: yes
+  tasks:
+
+    - name: Only ever run on staging or vagrant
+      debug:
+        msg: "Checking we are not live"
+      failed_when:
+        - "'staging' not in inventory_hostname"
+        - "'vagrant' not in inventory_hostname"
+        - "'homestead' not in inventory_hostname"
+
+   - name: Reseed Database
+     shell: php artisan migrate:fresh --seed --force
+     args:
+       executable: /bin/bash
+       chdir: /var/www/ARCVService/current_release
+     failed_when:
+       - "'staging' not in inventory_hostname"
+       - "'vagrant' not in inventory_hostname"
+       - "'homestead' not in inventory_hostname"
+
+    - name: Passport install
+      shell: php artisan passport:install
+      args:
+        executable: /bin/bash
+        chdir: /var/www/ARCVService/current_release
+      failed_when:
+        - "'staging' not in inventory_hostname"
+        - "'vagrant' not in inventory_hostname"
+        - "'homestead' not in inventory_hostname"
+      register: passport
+
+    - name: Grab client id
+      set_fact:
+        client_id: "{{ passport.stdout_lines[5].split(' ')[-1] }}"
+
+    - name: Grab client secret
+      set_fact:
+        client_secret: "{{ passport.stdout_lines[6].split(' ')[-1] }}"
+
+    - name: Set passport id
+      lineinfile:
+        path: /var/www/ARCVService/service_env
+        regexp: '^PASSWORD_CLIENT='
+        line: PASSWORD_CLIENT={{ client_id }}
+     failed_when:
+       - "'staging' not in inventory_hostname"
+       - "'vagrant' not in inventory_hostname"
+       - "'homestead' not in inventory_hostname"
+
+    - name: Set passport secret
+      lineinfile:
+        path: /var/www/ARCVService/service_env
+        regexp: '^PASSWORD_CLIENT_SECRET='
+        line: PASSWORD_CLIENT_SECRET={{ client_secret }}
+     failed_when:
+       - "'staging' not in inventory_hostname"
+       - "'vagrant' not in inventory_hostname"
+       - "'homestead' not in inventory_hostname"

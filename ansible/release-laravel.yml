@@ -1,5 +1,5 @@
 
-#- import_playbook: dump-db.yml
+- import_playbook: dump-db.yml
 
 - name: Playbook to release laravel (Store/Service)
   hosts: myservers
@@ -10,7 +10,7 @@
     - name: Set deploy dir
       set_fact:
         release_dir: "/var/www/ARCVService/releases/ARCVService-{{ tag }}"
-        
+
     - name: Clear storage directory
       file:
         state: absent
@@ -93,7 +93,7 @@
         dest: "{{ item }}"
         owner: "{{ webuser }}"
         group: "{{ webuser }}"
-        mode: u=rwX,g=rX,o=rX
+        mode: u=rwX,g=rwX,o=rX
       become: yes
       with_items:
         - "{{ release_dir }}/version.txt"

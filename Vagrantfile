@@ -18,21 +18,22 @@ Vagrant.configure("2") do |config|
             v.customize ["modifyvm", :id, "--cpus", "1"]
         end
 
-        arctest.vm.provision "shell", inline: "mkdir -p /opt /var/www/ARCVService/"
-
         arctest.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
         arctest.vm.provision "file", source: "assets/docker-compose.yml", destination: "/tmp/docker-compose.yml"
         arctest.vm.provision "file", source: "assets/node.sh", destination: "/tmp/node.sh"
         arctest.vm.provision "file", source: "assets/env", destination: "/tmp/service_env"
+        arctest.vm.provision "file", source: "assets/grants.sql", destination: "/tmp/grants.sql"
+        arctest.vm.provision "file", source: "assets/apache-sites.conf", destination: "/tmp/arc.conf"
 
         arctest.vm.provision "shell", inline: <<-SHELL
-            mkdir -p /opt /var/www/ARCVService/
+            mkdir -p /opt /var/www/ARCVService/ /docker-entrypoint-initdb.d
             cp /tmp/docker-compose.yml /opt/docker-compose.yml
             cp /tmp/service_env /var/www/ARCVService/service_env
+            cp /tmp/grants.sql /docker-entrypoint-initdb.d/grants.sql
 
             apt update
             apt upgrade -y
-            apt install -y apache2 git php mysql-client libapache2-mod-php php-mbstring php-cli php-json php-xml php-bcmath php-zip php-pdo php-common php-tokenizer php-mysql composer libsodium-dev npm docker.io docker-compose
+            apt install -y apache2 git php mysql-client libapache2-mod-php php-mbstring php-cli php-json php-xml php-bcmath php-zip php-pdo php-common php-tokenizer php-mysql composer libsodium-dev docker.io docker-compose
 
             git clone https://github.com/nvm-sh/nvm.git /opt/nvm
             mkdir /usr/local/nvm
@@ -43,6 +44,9 @@ Vagrant.configure("2") do |config|
             nvm alias default lts/gallium
             npm -g i yarn
 
+            ln -s /usr/local/node/bin/yarn /usr/local/bin
+            ln -s /usr/local/nvm/versions/node/v16.20.1/bin/node /usr/local/bin/
+
             systemctl enable apache2
             systemctl enable docker
 
@@ -52,6 +56,7 @@ Vagrant.configure("2") do |config|
             mkdir -p /var/www/ARCVService/{archives,releases,storage}
             mkdir -p /var/www/ARCVService/storage/{app,framework/cache,framework/views,framework/sessions,logs}
 
+            mv /tmp/docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
             docker-compose -f /opt/docker-compose.yml up -d
 
             git clone https://github.com/neontribe/ARCVService.git /var/www/ARCVService/releases/initial
@@ -71,6 +76,8 @@ Vagrant.configure("2") do |config|
             chmod 600 /home/neontribe/.ssh/authorized_keys
             chown -R www-data:www-data /var/www/ARCVService/storage/ /var/www/ARCVService/releases/*/bootstrap
 
+            echo -e "[mysqldump]\ncolumn-statistics=0\n" >> /etc/mysql/my.cnf
+
             echo "+------------------------------------------+"
             echo "| neontribe user created, password set to: |"
             echo "|     Zooloander123!                       |"
@@ -80,9 +87,9 @@ Vagrant.configure("2") do |config|
             echo "eth1 ip address: $(ip -4 addr)"
         SHELL
 
-        arctest.vm.provision "file", source: "assets/apache-sites.conf", destination: "/etc/apache2/sites-available/arc.conf"
 
         arctest.vm.provision "shell", inline: <<-SHELL
+            mv /tmp/arc.conf /etc/apache2/sites-available/arc.conf
             a2ensite arc
             a2enmod rewrite vhost_alias
             a2dissite 000-default.conf

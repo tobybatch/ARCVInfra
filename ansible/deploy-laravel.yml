@@ -18,7 +18,7 @@
 
     - name: Get release
       get_url:
-        url: https://github.com/neontribe/ARCVService/archive/refs/tags/{{ tag }}.tar.gz
+        url: https://github.com/neontribe/ARCVService/archive/refs/tags/ARCVService-{{ tag }}.tar.gz
         dest: /tmp/release-{{ tag }}.tgz
         mode: '0664'
 
@@ -95,6 +95,6 @@
         dest: "{{ release_dir }}"
         owner: "{{ webuser }}"
         group: "{{ webuser }}"
-        mode: u=rwX,g=rX,o=rX
+        mode: u=rwX,g=rwX,o=rX
         recurse: yes
       become: yes
