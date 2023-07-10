@@ -52,6 +52,12 @@
         dest: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
         remote_src: yes
 
+    - name: Link in htaccess
+      file:
+        state: link
+        src: /var/www/ARCVMarket/htaccess
+        dest: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}/.htaccess
+
     - name: Ensure ownership
       file:
         dest: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
