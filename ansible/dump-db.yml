@@ -14,19 +14,13 @@
         path: /var/www/ARCVService/current_release
       register: sym
 
-#    - debug:
-#        var: sym.stat.lnk_source
-
     - name: Set current release name as fact
       set_fact:
         current_release: "{{ sym.stat.lnk_source | basename }}"
 
     - name: SQL dump file name as fact
       set_fact:
-        dump_file: "/var/www/ARCVService/db-dumps/{{ current_release }}_{{ ansible_date_time.iso8601 }}.sql"
-
-    - debug:
-        var: dump_file
+        dump_file: "{{ current_release }}_{{ ansible_date_time.iso8601 }}.sql"
 
     - name: Dump DB
       shell: |
@@ -35,10 +29,9 @@
           -h127.0.0.1 \
           {{ db_name }} \
           --quick \
-          --lock-tables=false > "{{ dump_file }}.sql"
+          --lock-tables=false > "/var/www/ARCVService/db-dumps/{{ dump_file }}"
 
-#    - name: Link in env
-#    - name: Link in storage
-#    - name: Cache clear, Config clear, Optimise
-#    - name: Ensure ownership
-
+    - name: Get the dump
+      fetch:
+        src: "/var/www/ARCVService/db-dumps/{{ dump_file }}"
+        dest: dbdumps

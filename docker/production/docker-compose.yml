@@ -23,7 +23,7 @@ services:
     ports:
       - 8000:80
     volumes:
-      - public:/opt/project/public:ro
+      - app:/opt/project:ro
     restart: unless-stopped
     depends_on:
       - arc
@@ -37,7 +37,7 @@ services:
   arc:
     build:
       context: ../service
-    image: arc:fpm-dev
+    image: arc/fpm-dev
     environment:
       BRANCH: ${BRANCH:-develop}
       DB_DATABASE: ${DOCKER_DB_DATABASE:-arc}
@@ -47,7 +47,7 @@ services:
       DB_USERNAME: ${DOCKER_DB_USERNAME:-arc}
       RUN_AS: "10001:50"
     volumes:
-      - public:/opt/project/public
+      - app:/opt/project
       # .sh files in this dir will be executed on startup after migrations are run
       - ./docker-entrypoint-init.d:/docker-entrypoint-init.d
       - ./container.env:/opt/project/.env
@@ -58,12 +58,19 @@ services:
 #    stdin_open: true # docker run -i
 #    tty: true        # docker run -t
 
+  supervisor:
+    build:
+      context: ../supervisor
+    image: arc/supervisor
+
   mailer:
       image: schickling/mailcatcher
       ports:
           - "${MAILER_SMTP_PORT:-1025}:1025"
           - "${MAILER_ADMIN_PORT:-1080}:1080"
+    volumes:
+      - app:/opt/project
 
 volumes:
-    public:
+    :
     mysql:

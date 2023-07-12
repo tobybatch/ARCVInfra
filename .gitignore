@@ -4,4 +4,4 @@
 *.retry
 .idea
 .ansible_vault_passwd_file
-.env
+.envdbdumps
