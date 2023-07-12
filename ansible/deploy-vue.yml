@@ -66,4 +66,9 @@
         mode: u=rwX,g=rX,o=rX
         recurse: yes
 
+    - name: Release it by updating public_html symlink
+      file:
+        state: link
+        src: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
+        dest: /var/www/ARCVMarket/public_html
 

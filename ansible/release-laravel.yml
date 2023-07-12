@@ -99,3 +99,8 @@
         - "{{ release_dir }}/version.txt"
         - "{{ release_dir }}/storage"
 
+    - name: Restart supervisord
+      service:
+        name: httpd
+        state: restarted
+      become: yes
