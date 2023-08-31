@@ -1,4 +1,3 @@
-# See Docker.md for more info...
 version: '2.1'
 services:
 
@@ -16,6 +15,22 @@ services:
           - "${SQLDB_PORT:-3336}:3306"
         healthcheck:
             test: ["CMD", "mysql" ,"-u", "lamp", "-plamp", "-h", "localhost", "lamp", "-e", "'desc user;'"]
+            interval: 20s
+            retries: 10
+
+    testdb:
+        image: mysql:5.7
+        environment:
+            MYSQL_USER: testing
+            MYSQL_PASSWORD: testing
+            MYSQL_DATABASE: testing
+            MYSQL_ROOT_PASSWORD: notSecureChangeMe
+        tmpfs: /var/lib/mysql
+        restart: always
+        ports:
+          - "${TESTDB_PORT:-3337}:3306"
+        healthcheck:
+            test: ["CMD", "mysql" ,"-u", "testing", "-ptesting", "-h", "localhost", "testing", "-e", "'desc user;'"]
             interval: 20s
             retries: 10
 

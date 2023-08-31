@@ -1,76 +1,73 @@
 version: '3.5'
 services:
 
-  sqldb:
-    image: mysql:5.7
-    environment:
-      - MYSQL_DATABASE=${DOCKER_DB_DATABASE:-arc}
-      - MYSQL_USER=${DOCKER_DB_USER:-arc}
-      - MYSQL_PASSWORD=${DOCKER_DB_PASSWORD:-changem3please}
-      - MYSQL_ROOT_PASSWORD=${DOCKER_DB_ROOT:-reallychangethisplease}
-#    ports: # Uncomment this to expose your DB on port 3336
-#      - 3336:3306
-    volumes:
-      - mysql:/var/lib/mysql
-#        Any sql or sh files in this folder (e.g. db restore) are run on initialisation
-#        See https://hub.docker.com/_/mysql -> Initializing a fresh instance
-#      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
-    command: --default-storage-engine innodb
-    restart: unless-stopped
+    sqldb:
+        image: mysql:5.7
+        environment:
+            MYSQL_DATABASE: ${DOCKER_DB_DATABASE:-arc}
+            MYSQL_USER: ${DOCKER_DB_USER:-arc}
+            MYSQL_PASSWORD: ${DOCKER_DB_PASSWORD:-changem3please}
+            MYSQL_ROOT_PASSWORD: ${DOCKER_DB_ROOT:-reallychangethisplease}
+#        ports: # Uncomment this to expose your DB on port 3336
+#            - 3336:3306
+        volumes:
+            - mysql:/var/lib/mysql
+#                Any sql or sh files in this folder (e.g. db restore) are run on init
+#                See https://hub.docker.com/_/mysql -> Initializing a fresh instance
+#            - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+        command: --default-storage-engine innodb
+        restart: unless-stopped
 
-  nginx:
-    image: arc/nginx
-    ports:
-      - 8000:80
-    volumes:
-      - app:/opt/project:ro
-    restart: unless-stopped
-    depends_on:
-      - arc
-    healthcheck:
-      test:  wget --spider http://nginx/health || exit 1
-      interval: 20s
-      start_period: 10s
-      timeout: 10s
-      retries: 3
+    nginx:
+        image: arc/nginx
+        ports:
+          - ${HTTP_PORT:-8000}:80
+        volumes:
+            - app:/opt/project:ro
+        restart: unless-stopped
+        depends_on:
+            - arc
+        healthcheck:
+            test: wget --spider http://nginx/health || exit 1
+            interval: 20s
+            start_period: 10s
+            timeout: 10s
+            retries: 3
 
-  arc:
-    build:
-      context: ../service
-    image: arc/fpm-dev
-    environment:
-      BRANCH: ${BRANCH:-develop}
-      DB_DATABASE: ${DOCKER_DB_DATABASE:-arc}
-      DB_HOST: ${DOCKER_DB_HOST:-sqldb}
-      DB_PASSWORD: ${DOCKER_DB_PASSWORD:-changem3please}
-      DB_PORT: ${DOCKER_DB_PORT:-3306}
-      DB_USERNAME: ${DOCKER_DB_USERNAME:-arc}
-      RUN_AS: "10001:50"
-    volumes:
-      - app:/opt/project
-      # .sh files in this dir will be executed on startup after migrations are run
-      - ./docker-entrypoint-init.d:/docker-entrypoint-init.d
-      - ./container.env:/opt/project/.env
-      # Needed if we want to save passport key
-      # - ./.env:/opt/arc/ # touch .env before starting
-    restart: unless-stopped
-#    entrypoint: bash
-#    stdin_open: true # docker run -i
-#    tty: true        # docker run -t
+    arc:
+        build:
+            context: ../service
+        image: arc/fpm-dev
+        environment:
+            BRANCH: ${BRANCH:-develop}
+            DB_DATABASE: ${DOCKER_DB_DATABASE:-arc}
+            DB_HOST: ${DOCKER_DB_HOST:-sqldb}
+            DB_PASSWORD: ${DOCKER_DB_PASSWORD:-changem3please}
+            DB_PORT: ${DOCKER_DB_PORT:-3306}
+            DB_USERNAME: ${DOCKER_DB_USERNAME:-arc}
+            RUN_AS: "10001:50"
+        volumes:
+            # share the app so that the supervisor can get to it
+            - app:/opt/project
+            # .sh files in this dir will be executed on startup after migrations are run
+            - ./docker-entrypoint-init.d:/docker-entrypoint-init.d
+            # Needed if we want to save passport key
+            - ./container.env:/opt/arc/.env # Empty this is you want new APP_KEY and PASSPORT
+        restart: unless-stopped
 
-  supervisor:
-    build:
-      context: ../supervisor
-    image: arc/supervisor
+    supervisor:
+        build:
+            context: ../supervisor
+        image: arc/supervisor
 
-  mailer:
-      image: schickling/mailcatcher
-      ports:
-          - "${MAILER_SMTP_PORT:-1025}:1025"
-          - "${MAILER_ADMIN_PORT:-1080}:1080"
-    volumes:
-      - app:/opt/project
+    mailer:
+        image: schickling/mailcatcher
+        ports:
+            - "${MAILER_SMTP_PORT:-1025}:1025"
+            - "${MAILER_ADMIN_PORT:-1080}:1080"
+        volumes:
+            - app:/opt/project
 
 volumes:
-    :
+    app:
     mysql:

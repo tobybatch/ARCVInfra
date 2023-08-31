@@ -18,7 +18,7 @@
 
     - name: Get release
       get_url:
-        url: https://github.com/neontribe/ARCVService/archive/refs/tags/v{{ tag }}.tar.gz
+        url: https://github.com/neontribe/ARCVService/archive/refs/tags/{{ tag }}.tar.gz
         dest: /tmp/release-{{ tag }}.tgz
         mode: '0664'
 
