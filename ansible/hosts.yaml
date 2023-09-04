@@ -21,5 +21,12 @@ myservers:
       db_user_name: arcv
       db_name: arcv
       webuser: apache
+    arclive:
+      ansible_host: 138.68.140.141
+      ansible_port: 22
+      ansible_ssh_user: neontribe
+      db_user_name: arcv
+      db_name: arcv
+      webuser: apache
   vars:
     http_port: "80"
