@@ -99,8 +99,12 @@
         - "{{ release_dir }}/version.txt"
         - "{{ release_dir }}/storage"
 
-    - name: Restart supervisord
+    - name: Restart supervisord, httpd, fpm
       service:
-        name: httpd
+        name: "{{ item }}"
         state: restarted
       become: yes
+      with_items:
+        - supervisord
+        - httpd
+        - php-fpm
