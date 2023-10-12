@@ -35,5 +35,6 @@ foreach ($output as $line) {
         $cleaned[] = "PASSWORD_CLIENT_SECRET=" . $elements[2];
     }
 }
+exec("chmod 600 /opt/project/storage/*.key");
 
 file_put_contents("/opt/project/.env", implode("\n", $lines + $cleaned));

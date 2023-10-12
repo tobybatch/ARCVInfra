@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash -xe
 
 function checkDatabase() {
   echo "Wait for MySQL DB connection ..."
@@ -33,7 +33,6 @@ function handleStartup() {
   else
     # These are idempotent, run them anyway
     php /opt/project/artisan migrate
-    chmod 600 /opt/project/storage/*.key
   fi
 
   php /passport-install.php
@@ -46,8 +45,7 @@ function handleStartup() {
       fi
     done
   fi
-
-  export LOG_CHANNEL=stderr
+  yarn production
 }
 
 checkDatabase
@@ -70,6 +68,8 @@ if [ -n "$RUN_AS" ]; then
   fi
   sed -i "s/user = www-data/user = $USER_NAME/g" /usr/local/etc/php-fpm.d/www.conf
   sed -i "s/group = www-data/group = $GROUP_NAME/g" /usr/local/etc/php-fpm.d/www.conf
+
+  chown -R $USER_NAME:$GROUP_NAME /opt/project/storage
 fi
 
 exec php-fpm
