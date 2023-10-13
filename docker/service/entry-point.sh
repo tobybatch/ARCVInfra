@@ -2,11 +2,12 @@
 
 function checkDatabase() {
   echo "Wait for MySQL DB connection ..."
+  echo -n "Checking DB"
   until php /dbtest.php "$DB_HOST" "$DB_DATABASE" "$DB_PORT" "$DB_USERNAME" "$DB_PASSWORD"; do
-    echo Checking DB: $?
+    echo -n "."
     sleep 3
   done
-  echo "Connection established"
+  echo " ✅ Connection established"
 }
 
 function handleStartup() {

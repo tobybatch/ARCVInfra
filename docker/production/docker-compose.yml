@@ -14,7 +14,7 @@ services:
             - mysql:/var/lib/mysql
 #                Any sql or sh files in this folder (e.g. db restore) are run on init
 #                See https://hub.docker.com/_/mysql -> Initializing a fresh instance
-#            - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+            - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
         command: --default-storage-engine innodb
         restart: unless-stopped
 

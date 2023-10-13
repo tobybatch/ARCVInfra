@@ -5,10 +5,10 @@ $DB_PORT = $argv[3];
 $DB_USER = $argv[4];
 $DB_PASS = $argv[5];
 
-echo "Testing DB:";
-echo "*";
-echo "* new \PDO(mysql:host=$DB_HOST;dbname=$DB_BASE;port=$DB_PORT, $DB_USER, $DB_PASS, [ \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION ]);";
-echo "*";
+# echo "Testing DB:";
+# echo "*";
+# echo "* new \PDO(mysql:host=$DB_HOST;dbname=$DB_BASE;port=$DB_PORT, $DB_USER, $DB_PASS, [ \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION ]);";
+# echo "*";
 
 try {
     $pdo = new \PDO("mysql:host=$DB_HOST;dbname=$DB_BASE;port=$DB_PORT", "$DB_USER", "$DB_PASS", [
