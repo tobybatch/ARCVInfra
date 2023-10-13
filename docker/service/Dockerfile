@@ -7,7 +7,8 @@ FROM alpine:latest AS git-dev
 ARG BRANCH
 ARG TIMEZONE
 RUN apk add --no-cache git && \
-    git clone --depth 1 --branch ${BRANCH} https://github.com/neontribe/ARCVService.git /opt/project
+    git clone --depth 1 --branch ${BRANCH} https://github.com/neontribe/ARCVService.git /opt/project && \
+    git -C /opt/project rev-parse HEAD > /opt/project/current_hash
 WORKDIR /opt/project
 
 FROM composer:${COMPOSER_VER} AS composer
