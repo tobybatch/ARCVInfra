@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -x
 
 function checkDatabase() {
   echo "Wait for MySQL DB connection ..."
@@ -19,6 +19,8 @@ function handleStartup() {
       echo "Your are running a prod environment version but there is no .env file present"
       echo "You need to mount one into this container or the system cannot proceed."
       exit 1
+    else
+      touch .env
     fi
   fi
 
@@ -29,11 +31,14 @@ function handleStartup() {
     php /opt/project/artisan key:generate
   fi
 
+  # These are idempotent, run them anyway
+  php /opt/project/artisan migrate
   if [ "$APP_ENV" == "local" ] || [ "$APP_ENV" == "dev" ] || [ "$APP_ENV" == "development" ] ; then
-    php /opt/project/artisan migrate:refresh --seed --force
-  else
-    # These are idempotent, run them anyway
-    php /opt/project/artisan migrate
+    # check the DB, if there are no vouchers install fixtures
+    voucher_count=$(/opt/project/artisan tinker --execute='print(App\Voucher::all()->count()))')
+    if [ "$voucher_count" == "0" ]; then
+      php /opt/project/artisan migrate:refresh --seed --force
+    fi
   fi
 
   php /passport-install.php
@@ -52,7 +57,6 @@ function handleStartup() {
 checkDatabase
 handleStartup
 
-set +e # allow no 0 exits from here, the group creation is allowed to fail
 if [ -n "$RUN_AS" ]; then
   GROUP_ID=${RUN_AS#*:}
   USER_ID=${RUN_AS%:*}  # drops substring from last occurrence of `SubStr` to end of string

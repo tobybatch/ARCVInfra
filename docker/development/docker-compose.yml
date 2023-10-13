@@ -13,14 +13,14 @@ services:
 #    volumes:
 #        Any sql or sh files in this folder (e.g. db restore) are run on initialisation
 #        See https://hub.docker.com/_/mysql -> Initializing a fresh instance
-#      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+#      - ./initdb.d:/docker-entrypoint-initdb.d
     command: --default-storage-engine innodb
     restart: unless-stopped
 
   nginx:
     image: arc/nginx
     ports:
-      - 8000:80
+      - ${HTTP_PORT:-8000}:80
     volumes:
       - public:/opt/project/public:ro
     restart: unless-stopped
@@ -36,12 +36,13 @@ services:
   arc:
     build:
       context: ../service
+      args:
+        BRANCH: ${BRANCH:-develop}
       target: dev
     image: arc:fpm-dev
     environment:
       APP_ENV: "local"
       RUN_AS: "10001:50"
-      BRANCH: ${BRANCH:-develop}
       DB_DATABASE: ${DOCKER_DB_DATABASE:-arc}
       DB_HOST: ${DOCKER_DB_HOST:-sqldb}
       DB_PASSWORD: ${DOCKER_DB_PASSWORD:-changem3please}

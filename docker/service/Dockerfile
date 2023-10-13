@@ -180,23 +180,23 @@ VOLUME [ "/opt/project/storage" ]
 ENTRYPOINT /entry-point.sh
 
 # developement build
-#FROM base AS dev
-## copy kimai develop source
-#COPY --from=git-dev --chown=www-data:www-data /opt/project /opt/project
-#COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
-#COPY --from=php-ext-xdebug /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
-#COPY --from=php-ext-xdebug /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
-#RUN \
-#    export COMPOSER_HOME=/composer && \
-#    composer --no-ansi install --working-dir=/opt/project --optimize-autoloader && \
-#    composer --no-ansi clearcache && \
-#    cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini && \
-#    chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
-#    chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
-#    echo "error_reporting=E_ALL" > /usr/local/etc/php/conf.d/error_reporting.ini && \
-#    yarn
-#ENV APP_ENV=dev
-#ENV memory_limit=256M
+FROM base AS dev
+# copy kimai develop source
+COPY --from=git-dev --chown=www-data:www-data /opt/project /opt/project
+COPY ./xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+COPY --from=php-ext-xdebug /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+COPY --from=php-ext-xdebug /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
+RUN \
+    export COMPOSER_HOME=/composer && \
+    composer --no-ansi install --working-dir=/opt/project --optimize-autoloader && \
+    composer --no-ansi clearcache && \
+    cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini && \
+    chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
+    chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
+    echo "error_reporting=E_ALL" > /usr/local/etc/php/conf.d/error_reporting.ini && \
+    yarn
+ENV APP_ENV=dev
+ENV memory_limit=256M
 
 # production build
 FROM base AS prod
@@ -204,16 +204,17 @@ COPY --from=git-dev --chown=www-data:www-data /opt/project /opt/project
 RUN export COMPOSER_HOME=/composer
 RUN composer --no-ansi install --working-dir=/opt/project --no-dev --optimize-autoloader
 RUN composer --no-ansi clearcache
-RUN cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini
-RUN sed -i "s/expose_php = On/expose_php = Off/g" /usr/local/etc/php/php.ini
-RUN sed -i "s/;opcache.enable=1/opcache.enable=1/g" /usr/local/etc/php/php.ini
-RUN sed -i "s/;opcache.memory_consumption=128/opcache.memory_consumption=256/g" /usr/local/etc/php/php.ini
-RUN sed -i "s/;opcache.interned_strings_buffer=8/opcache.interned_strings_buffer=24/g" /usr/local/etc/php/php.ini
-RUN sed -i "s/;opcache.max_accelerated_files=10000/opcache.max_accelerated_files=100000/g" /usr/local/etc/php/php.ini
-RUN sed -i "s/opcache.validate_timestamps=1/opcache.validate_timestamps=0/g" /usr/local/etc/php/php.ini
-RUN sed -i "s/session.gc_maxlifetime = 1440/session.gc_maxlifetime = 604800/g" /usr/local/etc/php/php.ini
-RUN chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini
-RUN yarn
+RUN \
+    cp /usr/local/etc/php/php.ini-production /usr/local/etc/php/php.ini && \
+    sed -i "s/expose_php = On/expose_php = Off/g" /usr/local/etc/php/php.ini && \
+    sed -i "s/;opcache.enable=1/opcache.enable=1/g" /usr/local/etc/php/php.ini && \
+    sed -i "s/;opcache.memory_consumption=128/opcache.memory_consumption=256/g" /usr/local/etc/php/php.ini && \
+    sed -i "s/;opcache.interned_strings_buffer=8/opcache.interned_strings_buffer=24/g" /usr/local/etc/php/php.ini && \
+    sed -i "s/;opcache.max_accelerated_files=10000/opcache.max_accelerated_files=100000/g" /usr/local/etc/php/php.ini && \
+    sed -i "s/opcache.validate_timestamps=1/opcache.validate_timestamps=0/g" /usr/local/etc/php/php.ini && \
+    sed -i "s/session.gc_maxlifetime = 1440/session.gc_maxlifetime = 604800/g" /usr/local/etc/php/php.ini && \
+    chown -R www-data:www-data /opt/project /usr/local/etc/php/php.ini && \
+    yarn
 ENV APP_ENV=prod
 ENV SESSION_SECURE_COOKIE=true
 
