@@ -37,7 +37,7 @@ services:
     arc:
         build:
             context: ../service
-        image: arc/fpm-dev
+        image: arc/fpm
         environment:
             BRANCH: ${BRANCH:-develop}
             DB_DATABASE: ${DOCKER_DB_DATABASE:-arc}

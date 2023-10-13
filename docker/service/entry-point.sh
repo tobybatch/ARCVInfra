@@ -51,6 +51,7 @@ function handleStartup() {
 checkDatabase
 handleStartup
 
+set +e # allow no 0 exits from here, the group creation is allowed to fail
 if [ -n "$RUN_AS" ]; then
   GROUP_ID=${RUN_AS#*:}
   USER_ID=${RUN_AS%:*}  # drops substring from last occurrence of `SubStr` to end of string
