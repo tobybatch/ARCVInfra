@@ -16,6 +16,6 @@ This one goes to staging:
 
     ansible-playbook -i hosts.yaml -i vault.yml release-laravel.yml --extra-vars "tag=$TAG" -l arcstaging
 
-# Ressed staging
+# Reseed staging
 
     ansible-playbook -i hosts.yaml -i vault.yml reseed-staging.yml -l arcstaging
