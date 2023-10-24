@@ -35,11 +35,11 @@ services:
             retries: 3
 
     arc:
-        build:
-            context: ../service
-            args:
-              BRANCH: ${BRANCH:-develop}
-        image: arc/fpm
+       build:
+           context: ../service
+           args:
+             BRANCH: ${BRANCH:-develop}
+        image: arc/service
         environment:
             DB_DATABASE: ${DOCKER_DB_DATABASE:-arc}
             DB_HOST: ${DOCKER_DB_HOST:-sqldb}
