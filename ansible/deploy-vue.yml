@@ -9,7 +9,7 @@
 
     - name: Get release
       ansible.builtin.get_url:
-        url: https://github.com/neontribe/ARCVMarket/archive/refs/tags/v{{ tag }}.tar.gz
+        url: https://github.com/neontribe/ARCVMarket/archive/refs/tags/{{ tag }}.tar.gz
         dest: /var/tmp/release.tgz
         mode: '0440'
 
