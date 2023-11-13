@@ -88,16 +88,16 @@ Releases to live should **always** be a replication of code that was release to 
 export TAG="1.2.3-fc.1"
 
 # deploy service
-ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass deploy-laravel.yml --extra-vars "tag=$TAG" -l arclive --ask-vault-pass
+ansible-playbook -i hosts.yaml -i vault.yml deploy-laravel.yml --extra-vars "tag=$TAG" -l arclive --ask-vault-pass
 
 # deploy market
-ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass deploy-vue.yml --extra-vars "tag=$TAG" -l arclive --ask-vault-pass
+ansible-playbook -i hosts.yaml -i vault.yml deploy-vue.yml --extra-vars "tag=$TAG" -l arclive --ask-vault-pass
 
 # release service
-ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass release-laravel.yml --extra-vars "tag=$TAG" -l arclive --ask-vault-pass
+ansible-playbook -i hosts.yaml -i vault.yml release-laravel.yml --extra-vars "tag=$TAG" -l arclive --ask-vault-pass
 
 # release market
-ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass release-vue.yml --extra-vars "tag=$TAG" -l arclive --ask-vault-pass
+ansible-playbook -i hosts.yaml -i vault.yml release-vue.yml --extra-vars "tag=$TAG" -l arclive --ask-vault-pass
 ```
 
 
