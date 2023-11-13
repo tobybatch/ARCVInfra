@@ -55,7 +55,7 @@
       become: yes
 
     - name: Run migrations
-      shell: php artisan migrate
+      shell: php artisan migrate --force
       args:
         executable: /bin/bash
         chdir: /var/www/ARCVService/current_release
