@@ -1,1 +1,2 @@
 docker-entrypoint-initdb.d
+docker-entrypoint-init.d
