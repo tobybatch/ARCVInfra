@@ -34,11 +34,11 @@ services:
       retries: 3
 
   arc:
-    build:
-      context: ../service
-      args:
-        BRANCH: ${BRANCH:-develop}
-      target: dev
+    build: arcvouchers/service:develop
+      # context: ../service
+      # args:
+      # BRANCH: ${BRANCH:-develop}
+      # target: dev
     image: arc:fpm-dev
     environment:
       APP_ENV: "local"
