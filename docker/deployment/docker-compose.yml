@@ -18,7 +18,7 @@ services:
     restart: unless-stopped
 
   nginx:
-    image: arc/nginx
+    image: arcvouchers/nginx:latest
     ports:
       - ${HTTP_PORT:-8000}:80
     volumes:
@@ -33,13 +33,8 @@ services:
       timeout: 10s
       retries: 3
 
-  arc:
-    build: arcvouchers/service:develop
-      # context: ../service
-      # args:
-      # BRANCH: ${BRANCH:-develop}
-      # target: dev
-    image: arc:fpm-dev
+  arc-service:
+    image: arcvouchers/service:develop
     environment:
       APP_ENV: "local"
       RUN_AS: "10001:50"
@@ -60,10 +55,10 @@ services:
       - ./docker-entrypoint-init.d:/docker-entrypoint-init.d
       # Needed if we want to save passport key
       # - ./.env:/opt/arc/ # touch .env before starting
+
+  arc-market:
+    image: arcvouchers/market:develop
     restart: unless-stopped
-#    entrypoint: bash
-#    stdin_open: true # docker run -i
-#    tty: true        # docker run -t
 
   mailer:
       image: schickling/mailcatcher
