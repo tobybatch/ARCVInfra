@@ -31,7 +31,12 @@
           --quick \
           --lock-tables=false > "/var/www/ARCVService/db-dumps/{{ dump_file }}"
 
-    - name: Get the dump
-      fetch:
-        src: "/var/www/ARCVService/db-dumps/{{ dump_file }}"
-        dest: dbdumps
+    - name: Gzip the dump file
+      archive:
+        path: "/var/www/ARCVService/db-dumps/{{ dump_file }}"
+        remove: true
+
+#    - name: Get the dump
+#      fetch:
+#        src: "/var/www/ARCVService/db-dumps/{{ dump_file }}"
+#        dest: dbdumps
