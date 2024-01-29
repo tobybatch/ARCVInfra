@@ -8,9 +8,9 @@ services:
             MYSQL_PASSWORD: lamp
             MYSQL_DATABASE: lamp
             MYSQL_ROOT_PASSWORD: notSecureChangeMe
-        volumes:
-            - mysql:/var/lib/mysql
-            - ./initdb.d:/docker-entrypoint-initdb.d
+              #volumes:
+              #- mysql:/var/lib/mysql
+              #- ./initdb.d:/docker-entrypoint-initdb.d
         restart: always
         ports:
           - "${SQLDB_PORT:-3336}:3306"

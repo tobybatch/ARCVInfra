@@ -1,0 +1,40 @@
+version: '3.5'
+services:
+  # 192.168.21.97:5000/arcvouchers/service:prod
+  # 192.168.21.97:5000/arcvouchers/market:prod
+
+  sqldb:
+    image: mysql:5.7
+    environment:
+      - MYSQL_DATABASE=kimai
+      - MYSQL_USER=kimaiuser
+      - MYSQL_PASSWORD=kimaipassword
+      - MYSQL_ROOT_PASSWORD=changemeplease
+    volumes:
+      - mysql:/var/lib/mysql
+    command: --default-storage-engine innodb
+    restart: unless-stopped
+    healthcheck:
+      test: mysqladmin -p$$MYSQL_ROOT_PASSWORD ping -h localhost
+      interval: 20s
+      start_period: 10s
+      timeout: 10s
+      retries: 3
+
+  service:
+    image: 192.168.21.97:5000/arcvouchers/service:prod
+
+  market:
+    image: 192.168.21.97:5000/arcvouchers/market:prod
+
+  mailer:
+    image: schickling/mailcatcher
+    ports:
+      - "${MAILER_SMTP_PORT:-1025}:1025"
+      - "${MAILER_ADMIN_PORT:-1080}:1080"
+
+
+volumes:
+    var:
+    public:
+    mysql:
