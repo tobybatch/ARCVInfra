@@ -32,3 +32,5 @@
         mode: u=rwX,g=rX,o=rX
         recurse: yes
       become: yes
+
+    # restorecon -R /var/www/

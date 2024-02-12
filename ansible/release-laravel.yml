@@ -108,3 +108,5 @@
         - supervisord
         - httpd
         - php-fpm
+
+    # restorecon -R /var/www/
