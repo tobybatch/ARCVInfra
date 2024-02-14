@@ -60,7 +60,6 @@ services:
       - MAIL_PORT=1025
       - SESSION_SECURE_COOKIE=false
     volumes:
-      - /home/tobias/usr/arc/service/app:/opt/project/app
       - storage:/opt/project/storage
       - service_public:/opt/project/public
     extra_hosts:
