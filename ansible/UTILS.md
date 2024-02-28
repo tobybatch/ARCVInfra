@@ -22,7 +22,7 @@ ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass reseed-staging.yml
 
 ## Reseed staging
 
-This should refuse to run on prod by **be careful**
+This should refuse to run on prod but **be careful**
 
 ```shell
 ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass dump-db.yml -l arcstaging
