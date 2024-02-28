@@ -2,19 +2,19 @@
 
 ## Backup the DB
 
-Staging:
+### Staging
 
 ```shell
 ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass reseed-staging.yml -l arcstaging
 ```
 
-Live
+### Live
 
 ```shell
 ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass reseed-staging.yml -l arclive
 ```
 
-Both:
+### Both
 
 ```shell
 ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass reseed-staging.yml

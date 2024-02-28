@@ -14,15 +14,15 @@
         - "'vagrant' not in inventory_hostname"
         - "'homestead' not in inventory_hostname"
 
-   - name: Reseed Database
-     shell: php artisan migrate:fresh --seed --force
-     args:
-       executable: /bin/bash
-       chdir: /var/www/ARCVService/current_release
-     failed_when:
-       - "'staging' not in inventory_hostname"
-       - "'vagrant' not in inventory_hostname"
-       - "'homestead' not in inventory_hostname"
+    - name: Reseed Database
+      shell: php artisan migrate:fresh --seed --force
+      args:
+        executable: /bin/bash
+        chdir: /var/www/ARCVService/current_release
+      failed_when:
+        - "'staging' not in inventory_hostname"
+        - "'vagrant' not in inventory_hostname"
+        - "'homestead' not in inventory_hostname"
 
     - name: Passport install
       shell: php artisan passport:install
@@ -48,17 +48,17 @@
         path: /var/www/ARCVService/service_env
         regexp: '^PASSWORD_CLIENT='
         line: PASSWORD_CLIENT={{ client_id }}
-     failed_when:
-       - "'staging' not in inventory_hostname"
-       - "'vagrant' not in inventory_hostname"
-       - "'homestead' not in inventory_hostname"
+      failed_when:
+        - "'staging' not in inventory_hostname"
+        - "'vagrant' not in inventory_hostname"
+        - "'homestead' not in inventory_hostname"
 
     - name: Set passport secret
       lineinfile:
         path: /var/www/ARCVService/service_env
         regexp: '^PASSWORD_CLIENT_SECRET='
         line: PASSWORD_CLIENT_SECRET={{ client_secret }}
-     failed_when:
+      failed_when:
        - "'staging' not in inventory_hostname"
        - "'vagrant' not in inventory_hostname"
        - "'homestead' not in inventory_hostname"
