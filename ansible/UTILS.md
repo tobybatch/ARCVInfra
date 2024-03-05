@@ -28,3 +28,8 @@ This should refuse to run on prod but **be careful**
 ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass dump-db.yml -l arcstaging
 ```
 
+## Monthly maintenance
+
+```shell
+ansible-playbook -i hosts.yaml -i vault.yml monthy-maintenance.yml
+```
