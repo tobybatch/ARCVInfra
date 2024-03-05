@@ -1,19 +1,19 @@
 myservers:
   hosts:
-    vagrant:
-      ansible_host: 192.168.56.191
-      ansible_port: 22
-      ansible_ssh_user: neontribe
-      db_user_name: lamp
-      db_name: lamp
-      webuser: www-data
-    skunk:
-      ansible_host: 206.189.122.208
-      ansible_port: 22
-      ansible_ssh_user: neontribe
-      db_user_name: arcv
-      db_name: arcv
-      webuser: www-data
+    # vagrant:
+    # ansible_host: 192.168.56.191
+    # ansible_port: 22
+    # ansible_ssh_user: neontribe
+    # db_user_name: lamp
+    # db_name: lamp
+    # webuser: www-data
+    # skunk:
+    # ansible_host: 206.189.122.208
+    # ansible_port: 22
+    # ansible_ssh_user: neontribe
+    # db_user_name: arcv
+    # db_name: arcv
+    # webuser: www-data
     arcstaging:
       ansible_host: 138.68.180.157
       ansible_port: 22
