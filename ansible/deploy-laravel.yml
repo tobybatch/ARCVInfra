@@ -73,7 +73,7 @@
         COMPOSER_ALLOW_SUPERUSER: 1
 
     - name: Yarn install
-      shell: yarn
+      shell: yarn install --production=true
       args:
         executable: /bin/bash
         chdir: "{{ release_dir }}"
@@ -98,3 +98,7 @@
         mode: u=rwX,g=rwX,o=rX
         recurse: yes
       become: yes
+
+    - name: Restore se linux context just in case
+      shell: restorecon -R /var/www/ARCVService
+
