@@ -11,9 +11,6 @@
       file:
         path: "{{ release_dir }}"
         state: directory
-        owner: "{{ ansible_ssh_user }}"
-        group: "{{ ansible_ssh_user }}"
-        mode: u=rwX,g=rX,o=rX
       become: yes
 
     - name: Get release
@@ -72,17 +69,27 @@
       environment:
         COMPOSER_ALLOW_SUPERUSER: 1
 
-    - name: Yarn install
-      shell: yarn install --production=true
+    - name: Add yarn install wrapper script
+      copy:
+        src: assets/yarn-wrapper.sh
+        dest: "{{ release_dir }}/yarn-wrapper.sh"
+        group: root
+        owner: root
+        mode: 0755
+
+    - name: Yarn install and build
+      shell: docker run -v "{{ release_dir }}":/build:Z --entrypoint /build/yarn-wrapper.sh node:20
       args:
         executable: /bin/bash
         chdir: "{{ release_dir }}"
 
-    - name: Yarn build
-      shell: yarn production
-      args:
-        executable: /bin/bash
-        chdir: "{{ release_dir }}"
+    - name: Clean up node modules and helper script
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ release_dir }}/yarn-wrapper.sh"
+        - "{{ release_dir }}/node_modules"
 
     - name: Update version.txt
       shell: "echo {{ tag }} > version.txt"

@@ -32,13 +32,6 @@
         dest: "{{ release_dir }}/storage"
       become: yes
 
-    - name: Generate assets
-      shell: yarn production
-      args:
-        executable: /bin/bash
-        chdir: "{{ release_dir }}"
-      become: yes
-
     - name: Link current_release
       file:
         state: link
