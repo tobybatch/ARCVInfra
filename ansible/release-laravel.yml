@@ -104,7 +104,7 @@
         - supervisord
 
     - name: Restore se linux context just in case
-      shell: restorecon -R "{{ item }}"
+      shell: restorecon -r "{{ item }}"
       with_items:
         - "{{ release_dir }}"
         - /var/www/ARCVService/current_release
