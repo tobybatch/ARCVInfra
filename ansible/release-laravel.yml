@@ -99,9 +99,9 @@
         state: restarted
       become: yes
       with_items:
-        - supervisord
         - httpd
         - php-fpm
+        - supervisord
 
     - name: Restore se linux context just in case
       shell: restorecon -R "{{ item }}"
