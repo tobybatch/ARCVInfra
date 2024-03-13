@@ -103,4 +103,8 @@
         - httpd
         - php-fpm
 
-    # restorecon -R /var/www/
+    - name: Restore se linux context just in case
+      shell: restorecon -R "{{ item }}"
+      with_items:
+        - "{{ release_dir }}"
+        - /var/www/ARCVService/current_release

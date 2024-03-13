@@ -107,5 +107,5 @@
       become: yes
 
     - name: Restore se linux context just in case
-      shell: restorecon -R /var/www/ARCVService
+      shell: restorecon -R "{{ release_dir }}"
 
