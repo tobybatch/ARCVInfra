@@ -106,12 +106,9 @@
         recurse: yes
       become: yes
 
+    # chcon -R -t httpd_sys_content_t /var/www
     - name: Fix selinux context
       sefcontext:
         target: '/var/www(/.*)?'
         setype: httpd_sys_rw_content_t
         state: present
-
-    - name: Restore se linux context just in case
-      shell: restorecon -R "{{ release_dir }}"
-
