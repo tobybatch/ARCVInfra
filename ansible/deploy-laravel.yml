@@ -106,6 +106,12 @@
         recurse: yes
       become: yes
 
+    - name: Fix selinux context
+      sefcontext:
+        target: '/var/www(/.*)?'
+        setype: httpd_sys_rw_content_t
+        state: present
+
     - name: Restore se linux context just in case
       shell: restorecon -R "{{ release_dir }}"
 
