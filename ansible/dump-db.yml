@@ -42,9 +42,10 @@
         path: "/var/www/ARCVService/db-dumps/{{ dump_file }}"
         remove: true
 
-    - name: Get the dump
-      fetch:
-        src: "/var/www/ARCVService/db-dumps/{{ dump_file }}.gz"
-        dest: dbdumps
+    # This throws a memory error on live :(
+#    - name: Get the dump
+#      fetch:
+#        src: "/var/www/ARCVService/db-dumps/{{ dump_file }}.gz"
+#        dest: dbdumps
 
 # openssl aes-256-cbc -d -a -in /path/to/your/encrypted_output_file -out /path/to/decrypted_output_file -pass pass:your_encryption_password
