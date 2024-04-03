@@ -20,7 +20,7 @@
 
     - name: SQL dump file name as fact
       set_fact:
-        dump_file: "{{ current_release }}_{{ ansible_date_time.iso8601 }}.sql.enc"
+        dump_file: "{{ current_release }}_{{ ansible_date_time.iso8601 }}.sql.gz.enc"
 
     - name: Dump MySQL database and encrypt without writing to disk
       shell: >
@@ -33,19 +33,15 @@
           --user={{ db_user_name }} \
           --password={{ db_user_password }} \
           | \
+          gzip \
+          | \
           openssl aes-256-cbc -a -salt \
           -out "/var/www/ARCVService/db-dumps/{{ dump_file }}" \
           -pass pass:{{ db_crypt_password }}
 
-    - name: Gzip the dump file
-      archive:
-        path: "/var/www/ARCVService/db-dumps/{{ dump_file }}"
-        remove: true
-
-    # This throws a memory error on live :(
-#    - name: Get the dump
-#      fetch:
-#        src: "/var/www/ARCVService/db-dumps/{{ dump_file }}.gz"
-#        dest: dbdumps
+    - name: Get the dump
+      fetch:
+        src: "/var/www/ARCVService/db-dumps/{{ dump_file }}"
+        dest: dbdumps
 
 # openssl aes-256-cbc -d -a -in /path/to/your/encrypted_output_file -out /path/to/decrypted_output_file -pass pass:your_encryption_password
