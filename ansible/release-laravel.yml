@@ -61,7 +61,6 @@
         executable: /bin/bash
         chdir: /var/www/ARCVService/current_release
       with_items:
-        - cache:clear
         - config:clear
         - optimize:clear
         - view:clear
