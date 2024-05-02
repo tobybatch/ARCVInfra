@@ -8,6 +8,7 @@
       file:
         path: /var/www/ARCVService/db-dumps
         state: directory
+        mode: '0755'
 
     - name: Get current release
       stat:
@@ -38,6 +39,11 @@
           openssl aes-256-cbc -a -salt \
           -out "/var/www/ARCVService/db-dumps/{{ dump_file }}" \
           -pass pass:{{ db_crypt_password }}
+
+    - name: Make the file readable by neontribe
+      file:
+        path: "/var/www/ARCVService/db-dumps/{{ dump_file }}"
+        mode: '0644'
 
     - name: Get the dump
       fetch:

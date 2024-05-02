@@ -1,3 +1,13 @@
+##################################################################
+# START DOCKERS and tail their logs, ctrl-c will stop tailing logs
+# docker compose up -d && docker compose logs -f
+#
+# RESET DB - answer yes to all the prompts
+# docker compose stop && docker compose rm && docker system prune && docker volume prune
+#
+# DB INIT - start up with a provided SQL dump
+# put the sql file in the initdb.d folder in the folder and RESET DB && START DOCKERS
+#
 services:
 
     sqldb:
@@ -7,9 +17,9 @@ services:
             MYSQL_PASSWORD: lamp
             MYSQL_DATABASE: lamp
             MYSQL_ROOT_PASSWORD: notSecureChangeMe
-              #volumes:
-              #- mysql:/var/lib/mysql
-              #- ./initdb.d:/docker-entrypoint-initdb.d
+        volumes:
+            - mysql:/var/lib/mysql
+            - ./initdb.d:/docker-entrypoint-initdb.d
         restart: always
         ports:
           - "${SQLDB_PORT:-3336}:3306"
