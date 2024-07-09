@@ -40,5 +40,5 @@
     - name: Copy down OSCAP Results
       fetch:
         src: "{{ item.path }}"
-        dest: ./OSCAP_results
+        dest: /home/neontribe/OSCAP*
       with_items: "{{ files_to_copy.files }}"
