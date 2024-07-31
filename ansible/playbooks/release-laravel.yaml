@@ -1,6 +1,6 @@
 # We need to remove this, it takes 30mins to run on live and creates a dbdump >1Gb
 # It should be run before we release
-# - import_playbook: dump-db.yml
+# - import_playbook: dump-db.yaml
 
 - name: Playbook to release laravel (Store/Service)
   hosts: myservers

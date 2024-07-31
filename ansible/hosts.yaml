@@ -1,3 +1,4 @@
+---
 myservers:
   hosts:
     # vagrant:
@@ -23,6 +24,20 @@ myservers:
       webuser: apache
     arclive:
       ansible_host: 138.68.140.141
+      ansible_port: 22
+      ansible_ssh_user: neontribe
+      db_user_name: arcv
+      db_name: arcv_service
+      webuser: apache
+    arclive:
+      ansible_host: 138.68.140.141
+      ansible_port: 22
+      ansible_ssh_user: neontribe
+      db_user_name: arcv
+      db_name: arcv_service
+      webuser: apache
+    arcawspoc:
+      ansible_host: 18.130.159.41
       ansible_port: 22
       ansible_ssh_user: neontribe
       db_user_name: arcv

@@ -5,19 +5,19 @@
 ### Staging
 
 ```shell
-ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass dump-db.yml -l arcstaging
+ansible-playbook -i hosts.yaml -i vault.yaml --ask-vault-pass playbooks/dump-db.yaml -l arcstaging
 ```
 
 ### Live
 
 ```shell
-ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass dump-db.yml -l arclive
+ansible-playbook -i hosts.yaml -i vault.yaml --ask-vault-pass playbooks/dump-db.yaml -l arclive
 ```
 
 ### Both
 
 ```shell
-ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass dump-db.yml
+ansible-playbook -i hosts.yaml -i vault.yaml --ask-vault-pass playbooks/dump-db.yaml
 ```
 
 ## Reseed staging
@@ -25,11 +25,11 @@ ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass dump-db.yml
 This should refuse to run on prod but **be careful**
 
 ```shell
-ansible-playbook -i hosts.yaml -i vault.yml --ask-vault-pass reseed-staging.yml -l arcstaging
+ansible-playbook -i hosts.yaml -i vault.yaml --ask-vault-pass playbooks/reseed-staging.yaml -l arcstaging
 ```
 
 ## Monthly maintenance
 
 ```shell
-ansible-playbook -i hosts.yaml -i vault.yml monthy-maintenance.yml
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/monthy-maintenance.yaml
 ```

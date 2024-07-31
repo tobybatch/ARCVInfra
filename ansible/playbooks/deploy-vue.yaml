@@ -1,3 +1,4 @@
+---
 - name: Playbook to release Vue (Market)
   hosts: myservers
   become: yes
@@ -51,6 +52,17 @@
         src: /var/tmp/ARCVMarket-{{ tag }}/dist/
         dest: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
         remote_src: yes
+
+    - name: Check if the .htaccess file exists
+      stat:
+        path: files/htaccess
+      register: ht_access_file_status
+
+    - name: Copy the .htaccess file if it does not exist
+      copy:
+        src: /path/to/source/file
+        dest: /path/to/destination/file
+      when: not ht_access_file_status.stat.exists
 
     - name: Link in htaccess
       file:

@@ -13,7 +13,7 @@ Deploying service
 ```shell
 export TAG=1.17.2-rc3
 cd path/to/infra/repo/ansible <--- where that's you checkout of the ARCInfra repo
-ansible-playbook -i hosts.yaml -i vault.yml deploy-laravel.yml --extra-vars "tag=$TAG" -l arcstaging --ask-vault-pass
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/deploy-laravel.yaml --extra-vars "tag=$TAG" -l arcstaging --ask-vault-pass
 ```
 
 Deploying market
@@ -21,7 +21,7 @@ Deploying market
 ```shell
 export TAG=1.17.2-rc3
 cd path/to/infra/repo/ansible <--- where that's you checkout of the ARCInfra repo
-ansible-playbook -i hosts.yaml -i vault.yml deploy-vue.yml --extra-vars "tag=$TAG" -l arcstaging --ask-vault-pass
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/deploy-vue.yaml --extra-vars "tag=$TAG" -l arcstaging --ask-vault-pass
 ```
 
 **THE RELEASE IS NOT YET LIVE**
@@ -31,13 +31,13 @@ At this point you can shell onto the server and check the deployment. Whn you ar
 Releasing service:
 
 ```shell
-ansible-playbook -i hosts.yaml -i vault.yml release-laravel.yml --extra-vars "tag=$TAG" -l arcstaging --ask-vault-pass
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/release-laravel.yaml --extra-vars "tag=$TAG" -l arcstaging --ask-vault-pass
 ```
 
 Releasing market:
 
 ```shell
-ansible-playbook -i hosts.yaml -i vault.yml release-vue.yml --extra-vars "tag=$TAG" -l arcstaging --ask-vault-pass
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/release-vue.yaml --extra-vars "tag=$TAG" -l arcstaging --ask-vault-pass
 ```
 
 ## Creating a full release
