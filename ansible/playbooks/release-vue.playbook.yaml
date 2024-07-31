@@ -1,5 +1,5 @@
 
-#- import_playbook: dump-db.yaml
+#- import_playbook: dump-db.playbook.yaml
 
 - name: Playbook to release vue (Market)
   hosts: myservers

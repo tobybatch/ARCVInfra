@@ -1,4 +1,3 @@
----
 - name: Playbook to release Vue (Market)
   hosts: myservers
   become: yes
@@ -55,13 +54,13 @@
 
     - name: Check if the .htaccess file exists
       stat:
-        path: files/htaccess
+        path: /var/www/ARCVMarket//htaccess
       register: ht_access_file_status
 
     - name: Copy the .htaccess file if it does not exist
       copy:
-        src: /path/to/source/file
-        dest: /path/to/destination/file
+        src: ../files/htaccess
+        dest: /var/www/ARCVMarket//htaccess
       when: not ht_access_file_status.stat.exists
 
     - name: Link in htaccess

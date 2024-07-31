@@ -2,9 +2,11 @@
 
 ## Installation
 
+**Jetbrains** PyCharm is the best natch, but any of the suit will do. There are a number of plugins you'll want if you're going to dev. "Ansible", and "Ansible lint"
+
 ### Ubuntu/Debian/PopOs
 
-    sudo apt python3-is-pyton ansible
+    sudo apt python3-is-pyton ansible ansible-lint
     ansible-galaxy collection install community.general
 
 ### Centos/Rocky/DeadRat

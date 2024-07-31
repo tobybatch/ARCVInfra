@@ -1,5 +1,5 @@
 
-# - import_playbook: dump-db.yaml
+# - import_playbook: dump-db.playbook.yaml
 
 - name: Playbook to release laravel (Store/Service)
   hosts: myservers
@@ -13,6 +13,7 @@
         - "'staging' not in inventory_hostname"
         - "'vagrant' not in inventory_hostname"
         - "'homestead' not in inventory_hostname"
+        - "'arcawspoc' not in inventory_hostname"
 
     - name: Reseed Database
       shell: php artisan migrate:fresh --seed --force
@@ -23,6 +24,7 @@
         - "'staging' not in inventory_hostname"
         - "'vagrant' not in inventory_hostname"
         - "'homestead' not in inventory_hostname"
+        - "'arcawspoc' not in inventory_hostname"
 
     - name: Passport install
       shell: php artisan passport:install
@@ -33,6 +35,7 @@
         - "'staging' not in inventory_hostname"
         - "'vagrant' not in inventory_hostname"
         - "'homestead' not in inventory_hostname"
+        - "'arcawspoc' not in inventory_hostname"
       register: passport
 
     - name: Grab client id
@@ -52,6 +55,7 @@
         - "'staging' not in inventory_hostname"
         - "'vagrant' not in inventory_hostname"
         - "'homestead' not in inventory_hostname"
+        - "'arcawspoc' not in inventory_hostname"
 
     - name: Set passport secret
       lineinfile:
@@ -62,3 +66,4 @@
        - "'staging' not in inventory_hostname"
        - "'vagrant' not in inventory_hostname"
        - "'homestead' not in inventory_hostname"
+       - "'arcawspoc' not in inventory_hostname"
