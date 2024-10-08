@@ -1,0 +1,216 @@
+---
+- name: Playbook to release laravel (Store/Service)
+  hosts: myservers
+  become: yes
+
+  vars:
+    php_version: "8.2"
+    app_directory: "/var/www/ARCVService"
+    server_user: "nginx"
+
+  tasks:
+
+    ################################################
+    # INSTALL DEPENDENCIES
+    ################################################
+
+    - name: Update all packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install package dependencies
+      yum:
+        name:
+          - python3-pip
+          - certbot
+          - python3-certbot-nginx
+        state: present
+
+    - name: Install python dependencies
+      command: pip install PyMySQL
+
+    ################################################
+    # MYSQL/MARIA DATABASE
+    ################################################
+
+    - name: Install MySQL server
+      yum:
+        name: mariadb105-server
+        state: present
+
+    - name: Start and enable MySQL
+      systemd:
+        name: mariadb
+        state: started
+        enabled: true
+
+    - name: Set MySQL root password
+      mysql_user:
+        login_unix_socket: "{{ login_unix_socket }}"
+        name: root
+        password: "{{ db_root_password }}"
+        host_all: true
+        check_implicit_admin: true
+      # Allow this to fail, if this playbook is invoked twice the password is already set
+      ignore_errors: true
+
+    - name: Create a database for the application
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_user: root
+        login_password: "{{ db_root_password }}"
+        login_unix_socket: "{{ login_unix_socket }}"
+
+    - name: Create a MySQL user for the application
+      mysql_user:
+        name: "{{ db_user_name }}"
+        password: "{{ db_user_password }}"
+        priv: "{{ db_name }}.*:ALL"
+        state: present
+        login_user: root
+        login_password: "{{ db_root_password }}"
+        login_unix_socket: "{{ login_unix_socket }}"
+
+    - name: MySql - Remove anonymous users
+      mysql_user:
+        name: ''
+        state: absent
+        login_user: root
+        login_password: "{{ db_root_password }}"
+        login_unix_socket: "{{ login_unix_socket }}"
+
+    - name: MySql - Remove test database
+      mysql_db:
+        name: test
+        state: absent
+        login_user: root
+        login_password: "{{ db_root_password }}"
+        login_unix_socket: "{{ login_unix_socket }}"
+
+    - debug:
+        var: ansible_nodename
+
+    - name: Delete Hostname based MySQL user
+      mysql_user:
+        name: root
+        host: "{{ ansible_nodename }}"
+        state: absent
+        login_user: root
+        login_password: "{{ db_root_password }}"
+        login_unix_socket: "{{ login_unix_socket }}"
+
+    ################################################
+    # INSTALL PHP
+    ################################################
+
+    - name: Install PHP and required extensions
+      yum:
+        name:
+          - php{{ php_version }}
+          - php{{ php_version }}-cli
+          - php{{ php_version }}-common
+          - php{{ php_version }}-mysqlnd
+          - php{{ php_version }}-mbstring
+          - php{{ php_version }}-xml
+#          - php{{ php_version }}-curl
+#          - php{{ php_version }}-json
+          - php{{ php_version }}-zip
+          - php{{ php_version }}-fpm
+          - php{{ php_version }}-bcmath
+          - php{{ php_version }}-gd
+        state: present
+      when: php_version is defined
+
+    - name: Start and enable PHP-FPM
+      systemd:
+        name: php-fpm
+        state: started
+        enabled: true
+
+    ################################################
+    # NGINX
+    ################################################
+
+    - name: Install Nginx
+      yum:
+        name: nginx
+        state: present
+
+    - name: Start and enable Nginx
+      systemd:
+        name: nginx
+        state: started
+        enabled: true
+
+    - name: Create Nginx sites
+      template:
+        src: "{{ item }}"
+        dest: /etc/nginx/conf.d/{{ item }}
+      with_items:
+        - alexanderrose_admin.conf
+#        - alexanderrose_admin.ssl.conf
+        - alexanderrose_store.conf
+#        - alexanderrose_store.ssl.conf
+        - alexanderrose_market.conf
+#        - alexanderrose_market.ssl.conf
+
+    - name: Create Nginx fastcgi php configuration
+      template:
+        src: fastcgi-php.conf
+        dest: /etc/nginx/fastcgi-php.conf
+
+    - name: Create Nginx lets encrypt ssl options
+      template:
+        src: options-ssl-nginx.conf
+        dest:  /etc/letsencrypt/options-ssl-nginx.conf
+
+    - name: Get SSL certs
+      command: certbot --nginx -d {{ item }} -m {{ admin_email }} --agree-tos --non-interactive
+      with_items:
+        - "{{ arc_admin_domain }}"
+        - "{{ arc_store_domain }}"
+        - "{{ arc_market_domain }}"
+
+    - name: Test Nginx configuration
+      command: nginx -t
+
+    - name: Reload Nginx
+      systemd:
+        name: nginx
+        state: reloaded
+
+    ################################################
+    # SET UP SHARED FILES AND FOLDERS
+    ################################################
+
+    - name: Ensure app dir
+      file:
+        path: "{{ app_directory }}"
+        state: directory
+
+    - name: Check if env file exists
+      stat:
+        path: "{{ app_directory }}/service_env"
+      register: stat_result
+
+    - name: Add env file
+      template:
+        src: "{{ service_env }}"
+        dest: "{{ app_directory }}/service_env"
+      when: not stat_result.stat.exists
+
+
+    ################################################
+    # TIDY UP PACKAGES ONLY NEEDED DURING INSTALL
+    ################################################
+
+    - name: Remove un-needed python dependencies
+      command: pip uninstall -y PyMySQL
+
+    - name: Remove un-needed packages
+      yum:
+        name:
+          - python3-pip
+        state: absent
