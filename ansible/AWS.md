@@ -9,24 +9,42 @@
 6. Move key to $HOME/.ssh/arc-provision.pem
 7. Launch instance
 8. Add ip address to hosts.yaml
+9. Set the ansibile vault password in `.ansible_vault_passwd_file` (it's in the DXW 1Pass), or append `--ask-vault-pass` to the end of the cammands
+10. Change directory to this folder
 
-## Run the provsioner
+## Run the provisioner
 
 ```bash
-cd path/to/infra/repo/ansible # <--- where that's you checkout of the ARCInfra repo
-ansible-playbook -i hosts.yaml -i vault.yaml playbooks/provision.aws.redhat.playbook.yaml -l arcprovision --key-file ~/.ssh/arc-provision.pem --ask-vault-pass
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/provision.aws.redhat.playbook.yaml -l arcprovision --key-file ~/.ssh/arc-provision.pem
+```
+
+## Set the tags to deploy
+
+```bash
+export MARKET_TAG=1.7.1
+export SERVICE_TAG=1.16.8
 ```
 
 ## deploy market
 
 ```bash
-export TAG=1.7.1
-ansible-playbook -i hosts.yaml -i vault.yaml playbooks/deploy-vue.playbook.yaml --extra-vars "tag=$TAG" -l arcprovision --key-file ~/.ssh/arc-provision.pem
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/deploy-vue.playbook.yaml --extra-vars "tag=$MARKET_TAG" -l arcprovision --key-file ~/.ssh/arc-provision.pem
 ```
 
 ## deploy service
 
 ```bash
-export TAG=1.16.8
-ansible-playbook -i hosts.yaml -i vault.yaml playbooks/deploy-laravel.playbook.yaml --extra-vars "tag=$TAG" -l arcprovision --key-file ~/.ssh/arc-provision.pem
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/deploy-laravel.playbook.yaml --extra-vars "tag=$SERVICE_TAG" -l arcprovision --key-file ~/.ssh/arc-provision.pem
+```
+
+## release market:
+
+```bash
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/release-vue.playbook.yaml --extra-vars "tag=$MARKET_TAG" -l arcprovision --key-file ~/.ssh/arc-provision.pem
+```
+
+## release service:
+
+```bash
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/release-laravel.playbook.yaml --extra-vars "tag=$SERVICE_TAG" -l arcprovision --key-file ~/.ssh/arc-provision.pem
 ```

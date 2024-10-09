@@ -28,7 +28,10 @@
         state: present
 
     - name: Install python dependencies
-      command: pip install PyMySQL
+      command: pip install {{ item }}
+      with_items:
+          - PyMySQL
+          - supervisor
 
     ################################################
     # MYSQL/MARIA DATABASE
@@ -150,11 +153,8 @@
         dest: /etc/nginx/conf.d/{{ item }}
       with_items:
         - alexanderrose_admin.conf
-#        - alexanderrose_admin.ssl.conf
         - alexanderrose_store.conf
-#        - alexanderrose_store.ssl.conf
         - alexanderrose_market.conf
-#        - alexanderrose_market.ssl.conf
 
     - name: Create Nginx fastcgi php configuration
       template:
