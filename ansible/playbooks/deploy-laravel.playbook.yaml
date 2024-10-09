@@ -1,9 +1,27 @@
 - name: Playbook to release laravel (Store/Service)
   hosts: myservers
   become: yes
+
+  vars:
+      tools:
+          - composer
+          - docker
+
   tasks:
 
-    - name: Set deploy dir
+    - name: Install tools
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items: "{{ tools }}"
+
+    - name: Start services
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Set release dir
       set_fact:
         release_dir: "/var/www/ARCVService/releases/ARCVService-{{ tag }}"
 
@@ -109,3 +127,8 @@
     - name: Restore se linux context just in case
       shell: restorecon -R "{{ release_dir }}"
 
+    - name: Remove tools
+      yum:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ tools }}"

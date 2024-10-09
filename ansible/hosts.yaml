@@ -22,6 +22,7 @@ myservers:
       db_user_name: arcv
       db_name: arcv
       webuser: apache
+      webserver: https
     arclive:
       ansible_host: 138.68.140.141
       ansible_port: 22
@@ -29,19 +30,27 @@ myservers:
       db_user_name: arcv
       db_name: arcv_service
       webuser: apache
-    arclive:
-      ansible_host: 138.68.140.141
+      webserver: https
+#     arcawspoc:
+#       ansible_host: 18.130.159.41
+#       ansible_port: 22
+#       ansible_ssh_user: neontribe
+#       db_user_name: arcv
+#       db_name: arcv_service
+#       webuser: apache
+    arcprovision:
+      ansible_host: 18.134.164.80
       ansible_port: 22
-      ansible_ssh_user: neontribe
+      ansible_ssh_user: ec2-user
+      login_unix_socket: /var/lib/mysql/mysql.sock
       db_user_name: arcv
-      db_name: arcv_service
-      webuser: apache
-    arcawspoc:
-      ansible_host: 18.130.159.41
-      ansible_port: 22
-      ansible_ssh_user: neontribe
-      db_user_name: arcv
-      db_name: arcv_service
-      webuser: apache
+      db_name: arcv
+      service_env: service_env.staging
+      arc_admin_domain: admin-staging.nfn.org.uk
+      arc_store_domain: store-staging.nfn.org.uk
+      arc_market_domain: market-staging.nfn.org.uk
+      admin_email: "tobias@neontribe.co.uk"
+      webuser: nginx
+      webserver: nginx
   vars:
     http_port: "80"
