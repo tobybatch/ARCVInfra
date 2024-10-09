@@ -1,10 +1,33 @@
 - name: Playbook to release Vue (Market)
   hosts: myservers
   become: yes
+
+  vars:
+      tools:
+          - git
+          - docker
+
   tasks:
+
+    - name: Install tools
+      yum:
+        name: "{{ item }}"
+        state: latest
+      with_items: "{{ tools }}"
+
+    - name: Start services
+      systemd:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Set release dir
+      set_fact:
+        release_dir: "/var/tmp/ARCVMarket-{{ tag }}"
+
     - name: Ensure release dir
       file:
-        path: /var/www/ARCVMarket/releases/
+        path: "{{ release_dir }}"
         state: directory
 
     - name: Get release
@@ -26,29 +49,33 @@
         git config --global user.name "Ansible Bot"
         git commit --allow-empty --no-verify -m "chore: deploy {{ tag }}"
       args:
-        chdir: /var/tmp/ARCVMarket-{{ tag }}
+        chdir: "{{ release_dir }}"
 
-    - name: Yarn install
-      shell: yarn
+    - name: Add yarn install wrapper script
+      copy:
+        src: assets/yarn-wrapper.sh
+        dest: "{{ release_dir }}/yarn-wrapper.sh"
+        group: root
+        owner: root
+        mode: 0755
+
+    - name: Yarn install and build
+      shell: docker run -v "{{ release_dir }}":/build:Z --entrypoint /build/yarn-wrapper.sh node:20
       args:
         executable: /bin/bash
-        chdir: /var/tmp/ARCVMarket-{{ tag }}
+        chdir: "{{ release_dir }}"
 
-    - name: Yarn build
-      shell: yarn build
-      args:
-        executable: /bin/bash
-        chdir: /var/tmp/ARCVMarket-{{ tag }}
-
-    # This for some reason doesn't work
-#      yarn:
-#        name: build
-#        production: true
-#        path: /var/tmp/ARCVMarket-{{ tag }}
+    - name: Clean up node modules and helper script
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - "{{ release_dir }}/yarn-wrapper.sh"
+        - "{{ release_dir }}/node_modules"
 
     - name: Copy built files
       copy:
-        src: /var/tmp/ARCVMarket-{{ tag }}/dist/
+        src: "{{ release_dir }}/dist/"
         dest: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
         remote_src: yes
 
@@ -83,3 +110,8 @@
         src: /var/www/ARCVMarket/releases/ARCVMarket-{{ tag }}
         dest: /var/www/ARCVMarket/public_html
 
+    - name: Remove tools
+      yum:
+        name: "{{ item }}"
+        state: absent
+      with_items: "{{ tools }}"

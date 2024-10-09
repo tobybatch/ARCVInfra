@@ -16,3 +16,10 @@
 cd path/to/infra/repo/ansible # <--- where that's you checkout of the ARCInfra repo
 ansible-playbook -i hosts.yaml -i vault.yaml playbooks/provision.aws.redhat.playbook.yaml -l arcprovision --key-file ~/.ssh/arc-provision.pem --ask-vault-pass
 ```
+
+## deploy market
+
+```bash
+export TAG=1.7.1
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/deploy-vue.playbook.yaml --extra-vars "tag=$TAG" -l arcprovision --key-file ~/.ssh/arc-provision.pem
+```

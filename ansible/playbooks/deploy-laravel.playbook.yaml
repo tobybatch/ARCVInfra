@@ -3,7 +3,7 @@
   become: yes
   tasks:
 
-    - name: Set deploy dir
+    - name: Set release dir
       set_fact:
         release_dir: "/var/www/ARCVService/releases/ARCVService-{{ tag }}"
 
