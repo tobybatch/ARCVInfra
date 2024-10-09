@@ -1,7 +1,7 @@
 
 ## Create the image
 
-1. Vist https://d-c367049c3f.awsapps.com/start/#/
+1. Visit https://d-c367049c3f.awsapps.com/start/#/
 2. Log in
 3. Create a new Redhat instance
 4. Set disk size to 30gb
