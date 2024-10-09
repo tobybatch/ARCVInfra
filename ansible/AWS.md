@@ -23,3 +23,10 @@ ansible-playbook -i hosts.yaml -i vault.yaml playbooks/provision.aws.redhat.play
 export TAG=1.7.1
 ansible-playbook -i hosts.yaml -i vault.yaml playbooks/deploy-vue.playbook.yaml --extra-vars "tag=$TAG" -l arcprovision --key-file ~/.ssh/arc-provision.pem
 ```
+
+## deploy service
+
+```bash
+export TAG=1.16.8
+ansible-playbook -i hosts.yaml -i vault.yaml playbooks/deploy-laravel.playbook.yaml --extra-vars "tag=$TAG" -l arcprovision --key-file ~/.ssh/arc-provision.pem
+```
